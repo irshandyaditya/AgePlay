@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:age_play/widgets/bottom_navbar.dart';
+import 'package:camera/camera.dart';
+// import 'package:age_play/widgets/bottom_navbar.dart';
+import 'package:age_play/widgets/takepicture_screen.dart';
 
 class Camera extends StatefulWidget {
   @override
@@ -7,40 +9,36 @@ class Camera extends StatefulWidget {
 }
 
 class _CameraPageState extends State<Camera> {
-  int _currentIndex = 0;
+  CameraDescription? selectedCamera;
+  List<CameraDescription> cameras = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    // Mendapatkan daftar kamera yang tersedia
+    WidgetsFlutterBinding.ensureInitialized();
+    cameras = await availableCameras();
+
+    // Jika ada kamera yang tersedia, pilih yang pertama
+    if (cameras.isNotEmpty) {
+      setState(() {
+        selectedCamera = cameras.first;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Center(
-                child: Text('camera'),
-              )
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // Action for central button
-            Navigator.pushNamed(context, '/camera');
-        },
-        elevation: 0,
-        shape: CircleBorder(),
-        child: Icon(Icons.camera_alt_outlined, color: Colors.white,),
-        backgroundColor: Colors.red, // Red color for the central button
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomNavBarWidget(
-        currentIndex: _currentIndex, 
-        onTap: (index){
-          _currentIndex = index;
-        }
-      ),
+      body: cameras[0] == null
+          ? const Center(child: CircularProgressIndicator())
+          : TakePictureScreen(cameras), // Panggil `TakePictureScreen` dengan kamera yang dipilih
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
