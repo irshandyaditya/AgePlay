@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:age_play/page/login.dart';
+import 'package:age_play/pages/sign_up.dart';
 
-class SignUpPage extends StatelessWidget {
-  const SignUpPage({super.key});
+class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,6 @@ class SignUpPage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo
                 Image.asset(
                   'assets/logo_abu.png',
                   width: 150,
@@ -23,22 +22,23 @@ class SignUpPage extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 RichText(
+                  textAlign: TextAlign.center,
                   text: const TextSpan(
                     children: [
                       TextSpan(
-                        text: 'Sign',
+                        text: 'Log',
                         style: TextStyle(
+                          color: Colors.grey,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey,
                         ),
                       ),
                       TextSpan(
-                        text: ' Up',
+                        text: 'in',
                         style: TextStyle(
+                          color: Colors.red,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.red,
                         ),
                       ),
                     ],
@@ -56,16 +56,6 @@ class SignUpPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Username Field
-                const TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                    hintText: 'Enter your username',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
                 // Password Field
                 const TextField(
                   decoration: InputDecoration(
@@ -77,9 +67,11 @@ class SignUpPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Sign Up Button
+                // Login Button
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/home');
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(
@@ -88,7 +80,7 @@ class SignUpPage extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    'Sign Up',
+                    'Login',
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.white,
@@ -97,21 +89,21 @@ class SignUpPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Login Link
+                // Sign Up Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Do you have already account? "),
+                    const Text("You don't have an account? "),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const LoginPage()),
+                              builder: (context) => const SignUpPage()),
                         );
                       },
                       child: const Text(
-                        "Login",
+                        "SignUp",
                         style: TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.bold,

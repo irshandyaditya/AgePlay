@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'page/splash_screen.dart';
-import 'package:age_play/page/sign_up.dart';
+import 'pages/splash_screen.dart';
+import 'package:age_play/pages/sign_up.dart';
 import 'package:age_play/pages/home_page.dart';
 import 'package:age_play/pages/profile.dart';
 import 'package:age_play/pages/camera.dart';

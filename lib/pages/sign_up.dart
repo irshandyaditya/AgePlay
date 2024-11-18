@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:age_play/page/sign_up.dart';
+import 'package:age_play/pages/login.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class SignUpPage extends StatelessWidget {
+  const SignUpPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +14,7 @@ class LoginPage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Logo
                 Image.asset(
                   'assets/logo_abu.png',
                   width: 150,
@@ -22,23 +23,22 @@ class LoginPage extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 RichText(
-                  textAlign: TextAlign.center,
                   text: const TextSpan(
                     children: [
                       TextSpan(
-                        text: 'Log',
+                        text: 'Sign',
                         style: TextStyle(
-                          color: Colors.grey,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          color: Colors.grey,
                         ),
                       ),
                       TextSpan(
-                        text: 'in',
+                        text: ' Up',
                         style: TextStyle(
-                          color: Colors.red,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          color: Colors.red,
                         ),
                       ),
                     ],
@@ -56,6 +56,16 @@ class LoginPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
+                // Username Field
+                const TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Username',
+                    hintText: 'Enter your username',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
                 // Password Field
                 const TextField(
                   decoration: InputDecoration(
@@ -67,7 +77,7 @@ class LoginPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Login Button
+                // Sign Up Button
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
@@ -78,7 +88,7 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    'Login',
+                    'Sign Up',
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.white,
@@ -87,21 +97,21 @@ class LoginPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Sign Up Link
+                // Login Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("You don't have an account? "),
+                    const Text("Do you have already account? "),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const SignUpPage()),
+                              builder: (context) => const LoginPage()),
                         );
                       },
                       child: const Text(
-                        "SignUp",
+                        "Login",
                         style: TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.bold,

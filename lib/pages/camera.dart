@@ -35,7 +35,7 @@ class _CameraPageState extends State<Camera> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
-      body: cameras[0] == null
+      body: cameras.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : TakePictureScreen(cameras), // Panggil `TakePictureScreen` dengan kamera yang dipilih
       // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
