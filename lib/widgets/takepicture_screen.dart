@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; // Import untuk galeri
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart' as pathProvider;
 
 class TakePictureScreen extends StatefulWidget {
   final List<CameraDescription> cameras;
@@ -106,6 +106,36 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     }
   }
 
+  void capturePhoto() async {
+    if (!controller.value.isInitialized) {
+      return;
+    }
+
+    final Directory appDir = await pathProvider.getApplicationSupportDirectory();
+    final String capturePath = path.join(appDir.path, '${DateTime.now()}.jpg');
+    
+    if(controller.value.isTakingPicture){
+      return;
+    }
+
+    try {
+      setState(() {
+        isCapturing = true;
+      });
+
+      final XFile capturedImage = await controller.takePicture();
+      
+      print("Photo captured and saved to the gallery");
+
+    } catch (e) {
+      print("Error capturing photo: $e");
+    } finally {
+      setState(() {
+        isCapturing = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -126,6 +156,18 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        
+                        
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            child: Icon(Icons.arrow_back_ios_sharp, color: Colors.white)
+                          ),
+                        ),
+
                         Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: GestureDetector(
@@ -133,16 +175,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                               _toggleFlashLight();
                             },
                             child: _isFlashOn == false ? Icon(Icons.flash_off, color: Colors.white) : Icon(Icons.flash_on, color: Colors.white),
-                          ),
-                        ),
-                        
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: GestureDetector(
-                            onTap: () {
-
-                            },
-                            child: Icon(Icons.qr_code_scanner, color: Colors.white)
                           ),
                         ),
                       ],
@@ -216,18 +248,23 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                                   Expanded(child: Container()),
 
                                   Expanded(
-                                    child: Center(
-                                      child: Container(
-                                        height: 70,
-                                        width: 70,
-                                        decoration: BoxDecoration(
-                                          color: Colors.transparent,
-                                          borderRadius: BorderRadius.circular(50),
-                                          border: Border.all(
-                                            width: 4,
-                                            color: Colors.white,
-                                            style: BorderStyle.solid
-                                          )
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        capturePhoto();
+                                      },
+                                      child: Center(
+                                        child: Container(
+                                          height: 70,
+                                          width: 70,
+                                          decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            borderRadius: BorderRadius.circular(50),
+                                            border: Border.all(
+                                              width: 4,
+                                              color: Colors.white,
+                                              style: BorderStyle.solid
+                                            )
+                                          ),
                                         ),
                                       ),
                                     ),
