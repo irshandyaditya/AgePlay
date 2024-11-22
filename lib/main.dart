@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'pages/splash_screen.dart';
+import 'package:age_play/pages/sign_up.dart';
 import 'package:age_play/pages/home_page.dart';
 import 'package:age_play/pages/profile.dart';
 import 'package:age_play/pages/camera.dart';
@@ -8,18 +10,15 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AgePlay',
-      theme: ThemeData(
-        primarySwatch: Colors.red,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/home',
+      home: const Splashscreen(),
       routes: {
-        // '/': (context) => SplashScreen(),
+        '/signup': (context) => const SignUpPage(),
         '/home': (context) => HomePage(),
         '/profile': (context) => Profile(),
         '/camera': (context) => Camera(),
