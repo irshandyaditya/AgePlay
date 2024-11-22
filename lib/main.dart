@@ -5,7 +5,6 @@ import 'package:age_play/pages/home_page.dart';
 import 'package:age_play/pages/profile.dart';
 import 'package:age_play/pages/camera.dart';
 
-
 void main() {
   runApp(MyApp());
 }
@@ -21,8 +20,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/signup': (context) => const SignUpPage(),
         '/home': (context) => HomePage(),
-        '/profile': (context) => Profile(),   
-        '/camera': (context) => Camera(),  
+        '/profile': (context) => Profile(),
+        '/camera': (context) => Camera(),
       },
     );
   }
