@@ -1,145 +1,147 @@
+import 'package:age_play/pages/home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:age_play/pages/edit_profil.dart';
+import 'package:age_play/pages/sidebar.dart';
 import 'package:age_play/widgets/bottom_navbar.dart';
 
 class Profile extends StatefulWidget {
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  _ProfilState createState() => _ProfilState();
 }
 
-class _ProfilePageState extends State<Profile> {
+class _ProfilState extends State<Profile> {
   int _currentIndex = 1;
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
-      backgroundColor: Colors.grey[200],
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Stack(
-                clipBehavior: Clip.none, // Allow elements to overflow outside the Stack
-                children: [
-                  // Background image
-                  Container(
-                    height: screenHeight * 0.5, // Tinggi background lebih besar agar tampak jelas
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/splash.png'), // Ganti dengan path gambar Anda
-                        fit: BoxFit.cover, // Pastikan gambar mencakup seluruh kontainer
-                      ),
-                    ),
-                    
-                  ),
-                  Positioned(
-                    top: screenHeight * 0.255, // Posisi dari atas
-                    left: 0,
-                    right: 0,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircleAvatar(
-                          radius: 50, // Radius lingkaran
-                          backgroundColor: Colors.white, // Warna latar belakang untuk border (opsional)
-                          child: CircleAvatar(
-                            radius: 45, // Radius lingkaran dalam (kurangi untuk border)
-                            backgroundImage: AssetImage('assets/logo.png'), // Gambar di dalam
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        Text(
-                          'AgePlay',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Text(
-                          '@ageplay',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 70), // Tambahkan jarak setelah avatar
-                  Positioned(
-                    top: screenHeight * 0.45, // Posisi dari atas
-                    left: 20, // Posisi dari kiri
-                    right: 20, // Posisi dari kanan
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              UserInfoRow(
-                                title: 'Nama',
-                                value: 'Age Play',
-                              ),
-                              Divider(),
-                              UserInfoRow(
-                                title: 'Email',
-                                value: 'ageplay@gmail.com',
-                              ),
-                              Divider(),
-                              UserInfoRow(
-                                title: 'Password',
-                                value: '**********',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Garis tiga di pojok kanan atas
-                  // Avatar and user info
-                  Positioned(
-                    top: 20,
-                    right: 20,
-                    child: GestureDetector(
-                      onTap: () {
-                        // Logika ketika ikon ditekan
-                        print("Menu icon tapped");
-                      },
-                      child: Icon(
-                        Icons.menu,
-                        size: 30,
-                        color: Colors.white, // Warna putih agar tampak di background
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              
-              // Card for user information
-              
-            ],
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          },
+        ),
+        actions: [
+          Builder(
+            builder: (context) {
+              return IconButton(
+                icon: Icon(Icons.menu, color: Colors.white),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              );
+            },
           ),
+        ],
+      ),
+      extendBodyBehindAppBar: true,
+      drawer: CustomSidebar(),
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            Container(
+              height: 350,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/splash.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            Column(
+              children: [
+                SizedBox(height: 100),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 4),
+                      ),
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage: AssetImage('assets/foto.png'),
+                      ),
+                    ),
+                    Positioned(
+                      right: -10,
+                      top: 0,
+                      child: IconButton(
+                        icon: Icon(Icons.edit, color: Colors.red),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditProfile(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'AgePlay',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  '@ageplay',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                ),
+                SizedBox(height: 24),
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildInfoRow('Nama', 'Age Play'),
+                      SizedBox(height: 16),
+                      Divider(height: 1, color: Colors.grey[300]),
+                      SizedBox(height: 16),
+                      _buildInfoRow('Email', 'ageplay@gmail.com'),
+                      SizedBox(height: 16),
+                      Divider(height: 1, color: Colors.grey[300]),
+                      SizedBox(height: 16),
+                      _buildInfoRow('Password', '***********'),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Action for central button
           Navigator.pushNamed(context, '/camera');
         },
         elevation: 0,
         shape: CircleBorder(),
         child: Icon(Icons.camera_alt_outlined, color: Colors.white),
-        backgroundColor: Colors.red, // Red color for the central button
+        backgroundColor: Colors.red,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomNavBarWidget(
@@ -152,38 +154,28 @@ class _ProfilePageState extends State<Profile> {
       ),
     );
   }
-}
 
-class UserInfoRow extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const UserInfoRow({required this.title, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w500,
-            ),
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
           ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.black,
-            ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey[600],
+            decoration: label == 'Email' ? TextDecoration.underline : null,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
