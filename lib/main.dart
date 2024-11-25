@@ -6,6 +6,7 @@ import 'package:age_play/pages/profile.dart';
 import 'package:age_play/pages/camera.dart';
 import 'package:age_play/pages/about.dart';
 import 'package:age_play/pages/search.dart';
+import 'package:age_play/pages/bookmark.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
         '/camera': (context) => Camera(),
         '/about': (context) => AboutPage(),
         '/search': (context) => SearchPage(),
+        '/bookmark': (context) => BookmarkPage(),
       },
     );
   }

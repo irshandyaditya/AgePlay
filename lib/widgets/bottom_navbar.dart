@@ -55,7 +55,7 @@ class BottomNavBarWidget extends StatelessWidget {
                 color: currentIndex == 2 ? Colors.red : Colors.black,
               ),
               onPressed: () {
-                Navigator.pushNamed(context, '/bookmarks');
+                Navigator.pushNamed(context, '/bookmark');
                 onTap(2);
               },
             ),
