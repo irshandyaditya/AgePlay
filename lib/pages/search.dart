@@ -10,6 +10,7 @@ class _SearchPageState extends State<SearchPage> {
   TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   List<Map<String, String>> searchResults = [];
+  int _currentIndex = 1;
 
   final List<Map<String, String>> allItems = [
     {
@@ -216,9 +217,11 @@ class _SearchPageState extends State<SearchPage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomNavBarWidget(
-        currentIndex: 0,
+        currentIndex: _currentIndex,
         onTap: (index) {
-          // Handle bottom navigation
+          setState(() {
+            _currentIndex = index;
+          });
         },
       ),
     );

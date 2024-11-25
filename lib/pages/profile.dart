@@ -10,7 +10,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfilState extends State<Profile> {
-  int _currentIndex = 1;
+  int _currentIndex = 3;
 
   @override
   Widget build(BuildContext context) {
