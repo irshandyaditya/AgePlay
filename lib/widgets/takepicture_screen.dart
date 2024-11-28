@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'dart:math' as math;
+import 'package:age_play/widgets/displaypicture_screen.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; // Import untuk galeri
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as pathProvider;
+import 'package:image/image.dart' as img;
 
 class TakePictureScreen extends StatefulWidget {
   final List<CameraDescription> cameras;
@@ -114,7 +116,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     final Directory appDir = await pathProvider.getApplicationSupportDirectory();
     final String capturePath = path.join(appDir.path, '${DateTime.now()}.jpg');
     
-    if(controller.value.isTakingPicture){
+    if (controller.value.isTakingPicture) {
       return;
     }
 
@@ -123,10 +125,41 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         isCapturing = true;
       });
 
-      final XFile capturedImage = await controller.takePicture();
-      
-      print("Photo captured and saved to the gallery");
+      // Ambil gambar dari kamera
+      final image = await controller.takePicture();
 
+      if (_isFrontCamera) {
+        // Jika kamera depan, proses gambar untuk menghilangkan efek mirror
+        final originalImage = File(image.path);
+        final bytes = await originalImage.readAsBytes();
+
+        // Proses menggunakan package `image`
+        final decodedImage = img.decodeImage(bytes);
+        final flippedImage = img.flipHorizontal(decodedImage!); // Membalik gambar horizontal
+        final flippedImageBytes = img.encodeJpg(flippedImage);
+
+        // Simpan gambar yang sudah diproses
+        final flippedFile = File(capturePath);
+        await flippedFile.writeAsBytes(flippedImageBytes);
+
+        // Navigasikan ke layar berikutnya dengan gambar yang sudah tidak mirror
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => DisplayPictureScreen(
+              imagePath: flippedFile.path,
+            ),
+          ),
+        );
+      } else {
+        // Navigasi langsung untuk kamera belakang (tidak perlu transformasi)
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => DisplayPictureScreen(
+              imagePath: image.path,
+            ),
+          ),
+        );
+      }
     } catch (e) {
       print("Error capturing photo: $e");
     } finally {
@@ -261,7 +294,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
                                   Expanded(
                                     child: GestureDetector(
-                                      onTap: () {
+                                      onTap: () async {
                                         capturePhoto();
                                       },
                                       child: Center(
