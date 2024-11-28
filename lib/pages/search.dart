@@ -10,6 +10,10 @@ class _SearchPageState extends State<SearchPage> {
   TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   List<Map<String, String>> searchResults = [];
+  String? selectedAge;
+  String? selectedCategory;
+  int _currentIndex = 0;
+  bool _isFilterApplied = false; // Status filter
 
   final List<Map<String, String>> allItems = [
     {
@@ -17,7 +21,7 @@ class _SearchPageState extends State<SearchPage> {
       "price": "Rp 779.000",
       "developer": "ATLUS",
       "tags": "JRPG, RPG, Anime, Adventure",
-      "image": "assets/persona3.png",
+      "image": "assets/p5s.png",
     },
     // Tambahkan item lainnya sesuai kebutuhan
   ];
@@ -28,6 +32,7 @@ class _SearchPageState extends State<SearchPage> {
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text;
+        _performSearch();
       });
     });
   }
@@ -38,6 +43,120 @@ class _SearchPageState extends State<SearchPage> {
           .where((item) =>
               item["title"]!.toLowerCase().contains(_searchQuery.toLowerCase()))
           .toList();
+    });
+  }
+
+  void _showFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height,
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.arrow_back),
+                    onPressed: () {
+                      Navigator.pop(context); // Tutup modal
+                    },
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Filters',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+              Text('Age'),
+              DropdownButton<String>(
+                isExpanded: true,
+                value: selectedAge,
+                items: <String>['16+', '18+', 'All Ages']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedAge = newValue;
+                  });
+                },
+                hint: Text('Select Age'),
+              ),
+              SizedBox(height: 16),
+              Text('Categories'),
+              DropdownButton<String>(
+                isExpanded: true,
+                value: selectedCategory,
+                items: <String>['All Categories', 'Action', 'Adventure']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedCategory = newValue;
+                  });
+                },
+                hint: Text('Select Category'),
+              ),
+              Spacer(),
+              ElevatedButton(
+                onPressed: () {
+                  _applyFilters();
+                  Navigator.pop(context);
+                },
+                child: Text('Apply'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  minimumSize: Size(double.infinity, 50),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _applyFilters() {
+    setState(() {
+      searchResults = allItems.where((item) {
+        bool matchesCategory = selectedCategory == null ||
+            selectedCategory == 'All Categories' ||
+            item["tags"]!.contains(selectedCategory!);
+        bool matchesAge = selectedAge == null ||
+            (selectedAge == '16+' && item["tags"]!.contains('JRPG')) ||
+            (selectedAge == '18+' && item["tags"]!.contains('RPG'));
+        return matchesCategory && matchesAge;
+      }).toList();
+
+      // Update status filter
+      _isFilterApplied = selectedAge != null || selectedCategory != null;
+
+      // Menambahkan deskripsi filter
+      if (selectedCategory != null) {
+        _searchQuery =
+            'Filter: ${selectedCategory!}, Age: ${selectedAge ?? "Any"}';
+      }
     });
   }
 
@@ -70,8 +189,7 @@ class _SearchPageState extends State<SearchPage> {
                               hintText: "Search",
                               border: InputBorder.none,
                             ),
-                            onSubmitted: (_) =>
-                                _performSearch(), // Trigger search
+                            onSubmitted: (_) => _performSearch(),
                           ),
                         ),
                         IconButton(
@@ -82,6 +200,9 @@ class _SearchPageState extends State<SearchPage> {
                               _searchController.clear();
                               _searchQuery = '';
                               searchResults.clear();
+                              selectedAge = null; // Reset filter
+                              selectedCategory = null; // Reset filter
+                              _isFilterApplied = false; // Reset filter status
                             });
                           },
                         ),
@@ -90,16 +211,15 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                 ),
                 SizedBox(width: 16),
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE6EAEE),
-                    borderRadius: BorderRadius.circular(10),
+                IconButton(
+                  icon: Icon(
+                    _isFilterApplied
+                        ? Icons.filter_alt
+                        : Icons.filter_alt_outlined,
+                    color:
+                        _isFilterApplied ? Colors.red : const Color(0xFF808080),
                   ),
-                  child: Icon(
-                    Icons.filter_alt,
-                    color: const Color(0xFF808080),
-                  ),
+                  onPressed: _showFilterSheet,
                 ),
               ],
             ),
@@ -108,7 +228,7 @@ class _SearchPageState extends State<SearchPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                'Search: $_searchQuery',
+                _searchQuery,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -208,17 +328,16 @@ class _SearchPageState extends State<SearchPage> {
         },
         elevation: 0,
         shape: CircleBorder(),
-        child: Icon(
-          Icons.camera_alt_outlined,
-          color: Colors.white,
-        ),
-        backgroundColor: Colors.red, // Red color for the central button
+        child: Icon(Icons.camera_alt_outlined, color: Colors.white),
+        backgroundColor: Colors.red,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomNavBarWidget(
-        currentIndex: 0,
+        currentIndex: _currentIndex,
         onTap: (index) {
-          // Handle bottom navigation
+          setState(() {
+            _currentIndex = index;
+          });
         },
       ),
     );

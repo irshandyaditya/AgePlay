@@ -84,38 +84,40 @@ class _HomePageState extends State<HomePage> {
                     right: 0,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'TEKKEN 8',
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFFEDEDED),
+                      child: Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'TEKKEN 8',
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFFEDEDED),
+                              ),
                             ),
-                          ),
-                          Row(
-                            children: [
-                              InfoBadge(
-                                icon: Icon(Icons.sports_esports,
-                                    color: Colors.white, size: 16),
-                                text: 'Arcade',
-                              ),
-                              SizedBox(width: 16),
-                              InfoBadge(
-                                icon: Icon(Icons.fire_extinguisher_outlined,
-                                    color: Colors.white),
-                                text: '16+',
-                              ),
-                            ],
-                          ),
-                          SizedBox(width: 16),
-                          InfoBadge(
-                            icon: Icon(Icons.star, color: Colors.white),
-                            text: '4.5',
-                          ),
-                        ],
+                            Row(
+                              children: [
+                                InfoBadge(
+                                  icon: Icon(Icons.sports_esports,
+                                      color: Colors.white, size: 16),
+                                  text: 'Arcade',
+                                ),
+                                SizedBox(width: 16),
+                                InfoBadge(
+                                  icon: Icon(Icons.fire_extinguisher_outlined,
+                                      color: Colors.white),
+                                  text: '16+',
+                                ),
+                              ],
+                            ),
+                            SizedBox(width: 16),
+                            InfoBadge(
+                              icon: Icon(Icons.star, color: Colors.white),
+                              text: '4.5',
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -146,17 +148,17 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     _buildCategoryIcon(
                         'assets/categories/Apple Arcade.png', context),
-                    SizedBox(width: 16),
+                    SizedBox(width: 10),
                     _buildCategoryIcon(
                         'assets/categories/Soccer Ball.png', context),
-                    SizedBox(width: 16),
+                    SizedBox(width: 10),
                     _buildCategoryIcon(
                         'assets/categories/Adventure.png', context),
-                    SizedBox(width: 16),
+                    SizedBox(width: 10),
                     _buildCategoryIcon('assets/categories/Gun.png', context),
-                    SizedBox(width: 16),
+                    SizedBox(width: 10),
                     _buildCategoryIcon('assets/categories/Weapon.png', context),
-                    SizedBox(width: 16),
+                    SizedBox(width: 10),
                     _buildCategoryIcon('assets/categories/Cards.png', context),
                   ],
                 ),
@@ -236,7 +238,7 @@ class _HomePageState extends State<HomePage> {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 5.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -287,7 +289,7 @@ class PopularItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 160, // Pastikan lebar tetap
+      width: 160, // Fixed width for consistency
       margin: EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,24 +333,29 @@ class PopularItem extends StatelessWidget {
             ],
           ),
           SizedBox(height: 8),
-          Flexible(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 2, // Batasi maksimal 2 baris
-              overflow: TextOverflow
-                  .ellipsis, // Tambahkan "..." jika teks terlalu panjang
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
             ),
+            maxLines: 2, // Limit to 2 lines
+            overflow: TextOverflow.ellipsis, // Add ellipsis if too long
           ),
           SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: TextStyle(fontSize: 12, color: Colors.grey),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              InfoBadge(
+                icon: Icon(Icons.sports_esports, color: Colors.white, size: 16),
+                text: subtitle, // Use subtitle for InfoBadge
+              ),
+              SizedBox(width: 4),
+              InfoBadge(
+                icon:
+                    Icon(Icons.fire_extinguisher_outlined, color: Colors.white),
+                text: '16+', // Fixed example text
+              ),
+            ],
           ),
           SizedBox(height: 4),
           Row(
@@ -368,14 +375,12 @@ class PopularItem extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 4),
-          Flexible(
-            child: Text(
-              postedTime,
-              style: TextStyle(fontSize: 10, color: Colors.grey),
-              maxLines: 1, // Batasi hanya 1 baris
-              overflow: TextOverflow.ellipsis,
-            ),
+          SizedBox(height: 2), // Reduced height
+          Text(
+            postedTime,
+            style: TextStyle(fontSize: 10, color: Colors.grey),
+            maxLines: 1, // Limit to 1 line
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -392,18 +397,21 @@ class InfoBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(4),
+      padding:
+          EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Adjust padding
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white.withOpacity(0.3), // Semi-transparent background
+        borderRadius: BorderRadius.circular(20), // Rounded corners
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min, // Use min to fit content
         children: [
           icon,
-          SizedBox(width: 4),
+          SizedBox(width: 4), // Space between icon and text
           Text(
             text,
-            style: TextStyle(color: Colors.white, fontSize: 10),
+            style: TextStyle(
+                color: Colors.white, fontSize: 12), // Adjust font size
           ),
         ],
       ),
