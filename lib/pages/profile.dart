@@ -1,15 +1,13 @@
-import 'package:age_play/pages/home_page.dart';
 import 'package:flutter/material.dart';
-import 'package:age_play/pages/edit_profil.dart';
-import 'package:age_play/pages/sidebar.dart';
 import 'package:age_play/widgets/bottom_navbar.dart';
+import 'package:age_play/pages/edit_profil.dart';
 
 class Profile extends StatefulWidget {
   @override
-  _ProfilState createState() => _ProfilState();
+  _ProfileState createState() => _ProfileState();
 }
 
-class _ProfilState extends State<Profile> {
+class _ProfileState extends State<Profile> {
   int _currentIndex = 3;
 
   @override
@@ -17,119 +15,161 @@ class _ProfilState extends State<Profile> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage()),
-            );
-          },
-        ),
-        actions: [
-          Builder(
-            builder: (context) {
-              return IconButton(
-                icon: Icon(Icons.menu, color: Colors.white),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              );
-            },
+        backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        title: Text(
+          'Profile',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
-        ],
+        ),
       ),
-      extendBodyBehindAppBar: true,
-      drawer: CustomSidebar(),
       body: SingleChildScrollView(
-        child: Stack(
+        child: Column(
           children: [
+            const SizedBox(height: 8.0),
+            // Profile Details
             Container(
-              height: 350,
-              width: double.infinity,
               decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/splash.png'),
-                  fit: BoxFit.cover,
-                ),
+                color: Colors.white,
+                border: Border.all(color: Colors.grey[300]!, width: 1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: EdgeInsets.all(16.0),
+              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Muhammad Bagus Indrawan',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 4),
+                        Text('@ageplay', style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundImage: AssetImage('assets/foto.png'),
+                  ),
+                ],
               ),
             ),
-            Column(
-              children: [
-                SizedBox(height: 100),
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 4),
-                      ),
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundImage: AssetImage('assets/foto.png'),
-                      ),
-                    ),
-                    Positioned(
-                      right: -10,
-                      top: 0,
-                      child: IconButton(
-                        icon: Icon(Icons.edit, color: Colors.red),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditProfile(),
-                            ),
-                          );
-                        },
+            const SizedBox(height: 8.0),
+            // Account Details Section
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.grey[300]!, width: 1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                children: [
+                  ListTile(
+                    title: Text(
+                      'Account Details',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'AgePlay',
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Change',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Icon(Icons.arrow_forward_ios,
+                            size: 16, color: Colors.red),
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditProfile(),
+                        ),
+                      );
+                    },
+                  ),
+                  Divider(thickness: 1, height: 0, color: Colors.grey[300]),
+                  Container(
+                    color: Colors.grey[200],
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    child: Column(
+                      children: [
+                        _buildDetailRow('Nama', 'Muhammad Bagus Indrawan'),
+                        SizedBox(height: 16),
+                        _buildDetailRow('Email', 'ageplay@gmail.com'),
+                        SizedBox(height: 16),
+                        _buildDetailRow('Password', '**********'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8.0),
+            // About Us Section
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.grey[300]!, width: 1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              child: ListTile(
+                title: Text(
+                  'About Us',
                   style: TextStyle(
-                    fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
                   ),
                 ),
-                Text(
-                  '@ageplay',
+                onTap: () {
+                  Navigator.pushNamed(context, '/about');
+                },
+              ),
+            ),
+            const SizedBox(height: 8.0),
+            // Log Out Section
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.grey[300]!, width: 1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              child: ListTile(
+                title: Text(
+                  'Log Out',
                   style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 24),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 20),
-                  padding: EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildInfoRow('Nama', 'Age Play'),
-                      SizedBox(height: 16),
-                      Divider(height: 1, color: Colors.grey[300]),
-                      SizedBox(height: 16),
-                      _buildInfoRow('Email', 'ageplay@gmail.com'),
-                      SizedBox(height: 16),
-                      Divider(height: 1, color: Colors.grey[300]),
-                      SizedBox(height: 16),
-                      _buildInfoRow('Password', '***********'),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-              ],
+                onTap: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/signup', (route) => false);
+                },
+              ),
             ),
           ],
         ),
@@ -140,7 +180,10 @@ class _ProfilState extends State<Profile> {
         },
         elevation: 0,
         shape: CircleBorder(),
-        child: Icon(Icons.camera_alt_outlined, color: Colors.white),
+        child: Icon(
+          Icons.camera_alt_outlined,
+          color: Colors.white,
+        ),
         backgroundColor: Colors.red,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -155,24 +198,25 @@ class _ProfilState extends State<Profile> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildDetailRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: TextStyle(
-            fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Colors.black,
           ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey[600],
-            decoration: label == 'Email' ? TextDecoration.underline : null,
+        Flexible(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.normal,
+              color: Colors.grey[700],
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
