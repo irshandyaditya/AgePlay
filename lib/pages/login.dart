@@ -27,24 +27,19 @@ class _LoginPageState extends State<LoginPage> {
     const String apiUrl = 'https://polinemaesports.my.id/api/akun/login/';
 
     try {
-      // Gunakan MultipartRequest untuk mengirim form-data
       var request = http.MultipartRequest('POST', Uri.parse(apiUrl));
       request.fields['email'] = _emailController.text;
       request.fields['password'] = _passwordController.text;
 
-      // Kirim request
       var response = await request.send();
 
-      // Tangani respons
       if (response.statusCode == 200) {
         final responseData =
             jsonDecode(await response.stream.bytesToString());
 
         if (responseData['status'] == 'success') {
-          // Navigate to home page
           Navigator.pushNamed(context, '/home');
         } else {
-          // Show error message
           setState(() {
             _errorMessage = responseData['message'] ?? 'Login failed';
           });
