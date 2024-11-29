@@ -34,7 +34,8 @@ class _CameraPageState extends State<Camera> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
       body: cameras.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : TakePictureScreen(cameras), // Panggil `TakePictureScreen` dengan kamera yang dipilih

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'pages/splash_screen.dart';
 import 'package:age_play/pages/sign_up.dart';
 import 'package:age_play/pages/home_page.dart';
@@ -9,6 +10,15 @@ import 'package:age_play/pages/search.dart';
 import 'package:age_play/pages/bookmark.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Menyesuaikan status bar menggunakan SystemChrome
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent, // Membuat status bar transparan
+      statusBarIconBrightness: Brightness.dark, // Ikon terang (untuk background gelap)
+    ),
+  );
+
   runApp(MyApp());
 }
 

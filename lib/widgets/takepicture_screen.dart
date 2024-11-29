@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'dart:math' as math;
-import 'package:age_play/widgets/displaypicture_screen.dart';
+import 'package:age_play/pages/displaypicture_screen.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; // Import untuk galeri
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as pathProvider;
 import 'package:image/image.dart' as img;
@@ -30,40 +31,33 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   //For Zoom
   double _currentZoom = 1.0;
   File? _capturedImage;
-
-  //for making sound
-  // AssetsAudioPlayer audioPlayer = AssetsAudioPlayer();
-  
+  bool isLoading = false; // Menambahkan variabel isLoading
 
   @override
   void initState() {
     super.initState();
     controller = CameraController(widget.cameras[0], ResolutionPreset.max);
-    controller.initialize().then((value){
+    controller.initialize().then((value) {
       if (!mounted) {
-          return;
+        return;
       }
-      setState(() {
-        
-      });
+      setState(() {});
     });
   }
 
   @override
   void dispose() {
-    // Dispose of the controller when the widget is disposed.
     controller.dispose();
     super.dispose();
   }
 
   void _toggleFlashLight() {
-    if(_isFlashOn) {
+    if (_isFlashOn) {
       controller.setFlashMode(FlashMode.off);
       setState(() {
         _isFlashOn = false;
       });
-    }
-    else{
+    } else {
       controller.setFlashMode(FlashMode.torch);
       setState(() {
         _isFlashOn = true;
@@ -73,27 +67,21 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
   void _switchCamera() async {
     if (controller != null) {
-      // Dispose the current controller to release the camera resource
       await controller.dispose();
     }
 
-    // Increment or reset the selected camera index
     _selectedCameraIndex = (_selectedCameraIndex + 1) % widget.cameras.length;
-
-    // Initialize the new camera
     _initCamera(_selectedCameraIndex);
   }
 
   Future<void> _initCamera(int cameraIndex) async {
     controller = CameraController(widget.cameras[cameraIndex], ResolutionPreset.max);
-
     try {
       await controller.initialize();
       setState(() {
         if (cameraIndex == 0) {
           _isFrontCamera = false;
-        }
-        else{
+        } else {
           _isFrontCamera = true;
         }
       });
@@ -101,10 +89,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       print("Error message: ${e}");
     }
 
-    if(mounted){
-      setState(() {
-        
-      });
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -115,34 +101,31 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
     final Directory appDir = await pathProvider.getApplicationSupportDirectory();
     final String capturePath = path.join(appDir.path, '${DateTime.now()}.jpg');
-    
+
     if (controller.value.isTakingPicture) {
       return;
     }
 
     try {
       setState(() {
-        isCapturing = true;
+        isLoading = true; // Mengatur isLoading menjadi true saat proses memulai
       });
 
-      // Ambil gambar dari kamera
       final image = await controller.takePicture();
 
+      // waktu loading
+      await Future.delayed(Duration(seconds: 2)); 
+
       if (_isFrontCamera) {
-        // Jika kamera depan, proses gambar untuk menghilangkan efek mirror
         final originalImage = File(image.path);
         final bytes = await originalImage.readAsBytes();
-
-        // Proses menggunakan package `image`
         final decodedImage = img.decodeImage(bytes);
-        final flippedImage = img.flipHorizontal(decodedImage!); // Membalik gambar horizontal
+        final flippedImage = img.flipHorizontal(decodedImage!);
         final flippedImageBytes = img.encodeJpg(flippedImage);
 
-        // Simpan gambar yang sudah diproses
         final flippedFile = File(capturePath);
         await flippedFile.writeAsBytes(flippedImageBytes);
 
-        // Navigasikan ke layar berikutnya dengan gambar yang sudah tidak mirror
         await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => DisplayPictureScreen(
@@ -151,7 +134,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
           ),
         );
       } else {
-        // Navigasi langsung untuk kamera belakang (tidak perlu transformasi)
         await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => DisplayPictureScreen(
@@ -164,7 +146,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       print("Error capturing photo: $e");
     } finally {
       setState(() {
-        isCapturing = false;
+        isLoading = false; // Menyembunyikan loading setelah proses selesai
       });
     }
   }
@@ -173,33 +155,49 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        extendBodyBehindAppBar: true,
         body: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints){
+          builder: (BuildContext context, BoxConstraints constraints) {
             return Stack(
               children: [
                 Center(child: CircularProgressIndicator()), // Tampilkan loading jika belum siap
-    
+                if (controller.value.isInitialized)
+                  Positioned.fill(
+                    top: 0,
+                    bottom: _isFrontCamera == false ? 0 : 0,
+                    left: -100,
+                    right: -100,
+                    child: AspectRatio(
+                      aspectRatio: controller.value.aspectRatio,
+                      child: _isFrontCamera
+                          ? Transform(
+                              alignment: Alignment.center,
+                              transform: Matrix4.rotationY(math.pi),
+                              child: CameraPreview(controller),
+                            )
+                          : CameraPreview(controller),
+                    ),
+                  )
+                else
+                  Center(child: CircularProgressIndicator()),
+
                 Positioned(
                   top: 0,
                   left: 0,
                   right: 0,
                   child: Container(
                     height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.black
-                    ),
+                    decoration: BoxDecoration(color: Colors.transparent),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        
-                        
                         Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: GestureDetector(
                             onTap: () {
                               Navigator.pop(context);
                             },
-                            child: Icon(Icons.arrow_back_ios_sharp, color: Colors.white)
+                            child: Icon(Icons.arrow_back_ios_sharp, color: Colors.white),
                           ),
                         ),
                         if (_isFrontCamera == false)
@@ -209,40 +207,24 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                               onTap: () {
                                 _toggleFlashLight();
                               },
-                              child: _isFlashOn == false ? Icon(Icons.flash_off, color: Colors.white) : Icon(Icons.flash_on, color: Colors.white),
+                              child: _isFlashOn == false
+                                  ? Icon(Icons.flash_off, color: Colors.white)
+                                  : Icon(Icons.flash_on, color: Colors.white),
                             ),
                           ),
-                        
                       ],
                     ),
-                  )
+                  ),
                 ),
-                if (controller.value.isInitialized)
-                  Positioned.fill(
-                    top: 50,
-                    bottom: _isFrontCamera == false ? 0 : 150,
-                    child: AspectRatio(
-                      aspectRatio: controller.value.aspectRatio,
-                      child: _isFrontCamera
-                          ? Transform(
-                              alignment: Alignment.center,
-                              transform: Matrix4.rotationY(math.pi), // Membalik horizontal (mirror)
-                              child: CameraPreview(controller),
-                            )
-                          : CameraPreview(controller), // Kamera belakang tidak perlu transform
-                    ),
-                  )
-                else
-                  Center(child: CircularProgressIndicator()), // Loading jika belum siap
-                // camera
                 Positioned(
                   bottom: 0,
                   left: 0,
-                  right: 0, // Tambahkan right untuk memenuhi lebar
+                  right: 0,
                   child: Container(
                     height: 150,
                     decoration: BoxDecoration(
-                      color: _isFrontCamera == false ? Colors.black45 : Colors.black,
+                      color: Colors.transparent,
+                      // color: _isFrontCamera == false ? Colors.black45 : Colors.transparent,
                     ),
                     child: Column(
                       children: [
@@ -253,34 +235,37 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                             children: [
                               Expanded(
                                 child: Center(
-                                  child: Text("Video",
+                                  child: Text(
+                                    "Video",
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontWeight: FontWeight.bold
-                                    )
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),
                               Expanded(
                                 child: Center(
-                                  child: Text("Photo",
+                                  child: Text(
+                                    "Photo",
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontWeight: FontWeight.bold
-                                    )
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),
                               Expanded(
                                 child: Center(
-                                  child: Text("Pro Mode",
+                                  child: Text(
+                                    "Pro Mode",
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontWeight: FontWeight.bold
-                                    )
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -291,7 +276,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                               Row(
                                 children: [
                                   Expanded(child: Container()),
-
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () async {
@@ -307,34 +291,96 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                                             border: Border.all(
                                               width: 4,
                                               color: Colors.white,
-                                              style: BorderStyle.solid
-                                            )
+                                              style: BorderStyle.solid,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
-
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () {
                                         _switchCamera();
                                       },
-                                      child: Icon(Icons.cameraswitch_sharp, color: Colors.white, size: 50), // Ukuran ikon diatur ulang
+                                      child: Icon(Icons.cameraswitch_sharp, color: Colors.white, size: 50),
                                     ),
-                                  )
+                                  ),
                                 ],
-                              )
+                              ),
                             ],
-                          )
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
+                // Menambahkan indikator loading tambahan
+                if (isLoading)
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.white.withOpacity(1), // Latar putih transparan
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Animasi loading menggunakan circleStrokeSpin
+                                SizedBox(
+                                  width: 120, // Ukuran lingkaran animasi
+                                  height: 120,
+                                  child: LoadingIndicator(
+                                    indicatorType: Indicator.circleStrokeSpin,
+                                    colors: [const Color.fromARGB(255, 245, 245, 245)],
+                                    strokeWidth: 3.0,
+                                    // pathBackgroundColor: Colors.black,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 200, // Ukuran lingkaran animasi
+                                  height: 200,
+                                  child: LoadingIndicator(
+                                    indicatorType: Indicator.ballScaleRippleMultiple,
+                                    colors: [const Color.fromARGB(255, 233, 233, 233)],
+                                    strokeWidth: 4.0,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 280, // Ukuran lingkaran animasi
+                                  height: 280,
+                                  child: LoadingIndicator(
+                                    indicatorType: Indicator.ballScaleRippleMultiple,
+                                    colors: [const Color.fromARGB(255, 247, 247, 247), const Color.fromARGB(255, 255, 216, 216), const Color.fromARGB(255, 216, 238, 255)],
+                                    strokeWidth: 4.0,
+                                  ),
+                                ),
+                                // Ikon profil di tengah
+                                CircleAvatar(
+                                  radius: 30,
+                                  backgroundColor: const Color.fromARGB(255, 28, 94, 199).withOpacity(0.8),
+                                  child: Icon(
+                                    Icons.person,
+                                    color: Colors.white,
+                                    size: 40,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 20),
+                            Text(
+                              "Processing...",
+                              style: TextStyle(color: Colors.black, fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             );
-          }
+          },
         ),
       ),
     );
