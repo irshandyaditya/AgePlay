@@ -167,7 +167,7 @@ class _ProfileState extends State<Profile> {
                 ),
                 onTap: () {
                   Navigator.pushNamedAndRemoveUntil(
-                      context, '/signup', (route) => false);
+                      context, '/login', (route) => false);
                 },
               ),
             ),

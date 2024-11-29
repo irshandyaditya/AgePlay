@@ -33,7 +33,7 @@ class Splashscreen extends StatelessWidget {
       duration: const Duration(milliseconds: 4500),
       animationDuration: const Duration(milliseconds: 1000),
       onAnimationEnd: () {
-        Navigator.pushReplacementNamed(context, '/signup');
+        Navigator.pushReplacementNamed(context, '/login');
       },
     );
   }

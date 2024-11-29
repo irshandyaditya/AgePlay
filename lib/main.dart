@@ -1,3 +1,4 @@
+import 'package:age_play/pages/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'pages/splash_screen.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         '/about': (context) => AboutPage(),
         '/search': (context) => SearchPage(),
         '/bookmark': (context) => BookmarkPage(),
+        '/login': (context) => LoginPage()
       },
     );
   }
