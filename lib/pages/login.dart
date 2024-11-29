@@ -1,8 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:age_play/pages/sign_up.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  Future<void> _login() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    // API Endpoint
+    const String apiUrl = 'https://polinemaesports.my.id/api/akun/login/';
+
+    try {
+      // Gunakan MultipartRequest untuk mengirim form-data
+      var request = http.MultipartRequest('POST', Uri.parse(apiUrl));
+      request.fields['email'] = _emailController.text;
+      request.fields['password'] = _passwordController.text;
+
+      // Kirim request
+      var response = await request.send();
+
+      // Tangani respons
+      if (response.statusCode == 200) {
+        final responseData =
+            jsonDecode(await response.stream.bytesToString());
+
+        if (responseData['status'] == 'success') {
+          // Navigate to home page
+          Navigator.pushNamed(context, '/home');
+        } else {
+          // Show error message
+          setState(() {
+            _errorMessage = responseData['message'] ?? 'Login failed';
+          });
+        }
+      } else {
+        setState(() {
+          _errorMessage = 'Failed to connect to server';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An error occurred: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +108,9 @@ class LoginPage extends StatelessWidget {
                 const SizedBox(height: 30),
 
                 // Email Field
-                const TextField(
-                  decoration: InputDecoration(
+                TextField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
                     labelText: 'Email',
                     hintText: 'Enter your email',
                     border: OutlineInputBorder(),
@@ -57,8 +119,9 @@ class LoginPage extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // Password Field
-                const TextField(
-                  decoration: InputDecoration(
+                TextField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
                     labelText: 'Password',
                     hintText: 'Enter your password',
                     border: OutlineInputBorder(),
@@ -67,11 +130,19 @@ class LoginPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
+                // Error Message
+                if (_errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 20.0),
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+
                 // Login Button
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/home');
-                  },
+                  onPressed: _isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(
@@ -79,13 +150,19 @@ class LoginPage extends StatelessWidget {
                       vertical: 15,
                     ),
                   ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 20),
 
