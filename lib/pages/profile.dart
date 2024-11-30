@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:age_play/widgets/bottom_navbar.dart';
 import 'package:age_play/pages/edit_profil.dart';
 
@@ -8,7 +9,41 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  final storage = const FlutterSecureStorage(); // Instance Secure Storage
   int _currentIndex = 3;
+
+  String? _name; // Nama user
+  String? _email; // Email user
+  String? _password; // Password user
+  String? _profilePicture; // URL foto profil user
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    // Ambil data akun dari secure storage
+    final name = await storage.read(key: 'name'); // Nama user
+    final email = await storage.read(key: 'email'); // Email user
+    final password = await storage.read(key: 'password'); // Password user
+    final profilePicture = await storage.read(key: 'profile_picture'); // Foto profil user
+
+    setState(() {
+      _name = name ?? 'Unknown';
+      _email = email ?? 'Unknown';
+      _password = password ?? '****'; // Jika tidak ada, tampilkan default
+      _profilePicture = profilePicture; // Jika tidak ada, akan ditangani di UI
+    });
+  }
+
+  Future<void> _logout() async {
+    // Hapus semua data dari secure storage
+    await storage.deleteAll();
+    // Navigasi ke halaman login
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +54,7 @@ class _ProfileState extends State<Profile> {
         backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
         centerTitle: true,
-        title: Text(
+        title: const Text(
           'Profile',
           style: TextStyle(
             color: Colors.black,
@@ -39,8 +74,8 @@ class _ProfileState extends State<Profile> {
                 border: Border.all(color: Colors.grey[300]!, width: 1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: EdgeInsets.all(16.0),
-              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.all(16.0),
+              margin: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -49,22 +84,28 @@ class _ProfileState extends State<Profile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Muhammad Bagus Indrawan',
-                          style: TextStyle(
+                          _name ?? 'Loading...',
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 4),
-                        Text('@ageplay', style: TextStyle(color: Colors.grey)),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${_email ?? 'Loading...'}',
+                          style: const TextStyle(color: Colors.grey),
+                        ),
                       ],
                     ),
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   CircleAvatar(
                     radius: 35,
-                    backgroundImage: AssetImage('assets/foto.png'),
+                    backgroundImage: _profilePicture != null
+                        ? NetworkImage(_profilePicture!) // Jika ada foto profil
+                        : const AssetImage('assets/foto_profil.png')
+                            as ImageProvider, // Default foto profil
                   ),
                 ],
               ),
@@ -77,11 +118,11 @@ class _ProfileState extends State<Profile> {
                 border: Border.all(color: Colors.grey[300]!, width: 1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              margin: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 children: [
                   ListTile(
-                    title: Text(
+                    title: const Text(
                       'Account Details',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -89,7 +130,7 @@ class _ProfileState extends State<Profile> {
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: [
+                      children: const [
                         Text(
                           'Change',
                           style: TextStyle(
@@ -105,7 +146,11 @@ class _ProfileState extends State<Profile> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => EditProfile(),
+                          builder: (context) => EditProfile(
+                            name: _name ?? 'Unknown',
+                            email: _email ?? 'Unknown',
+                            profilePicture: _profilePicture ?? '',
+                          ),
                         ),
                       );
                     },
@@ -113,14 +158,18 @@ class _ProfileState extends State<Profile> {
                   Divider(thickness: 1, height: 0, color: Colors.grey[300]),
                   Container(
                     color: Colors.grey[200],
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
                     child: Column(
                       children: [
-                        _buildDetailRow('Nama', 'Muhammad Bagus Indrawan'),
-                        SizedBox(height: 16),
-                        _buildDetailRow('Email', 'ageplay@gmail.com'),
-                        SizedBox(height: 16),
-                        _buildDetailRow('Password', '**********'),
+                        _buildDetailRow('Nama', _name ?? 'Loading...'),
+                        const SizedBox(height: 16),
+                        _buildDetailRow('Email', _email ?? 'Loading...'),
+                        const SizedBox(height: 16),
+                        _buildDetailRow(
+                          'Password',
+                          '*' * (_password?.length ?? 10), // Sembunyikan password
+                        ),
                       ],
                     ),
                   ),
@@ -135,9 +184,9 @@ class _ProfileState extends State<Profile> {
                 border: Border.all(color: Colors.grey[300]!, width: 1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              margin: const EdgeInsets.symmetric(horizontal: 16.0),
               child: ListTile(
-                title: Text(
+                title: const Text(
                   'About Us',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -156,19 +205,16 @@ class _ProfileState extends State<Profile> {
                 border: Border.all(color: Colors.grey[300]!, width: 1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              margin: EdgeInsets.symmetric(horizontal: 16.0),
+              margin: const EdgeInsets.symmetric(horizontal: 16.0),
               child: ListTile(
-                title: Text(
+                title: const Text(
                   'Log Out',
                   style: TextStyle(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                onTap: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, '/login', (route) => false);
-                },
+                onTap: _logout, // Logout function
               ),
             ),
           ],
@@ -179,8 +225,8 @@ class _ProfileState extends State<Profile> {
           Navigator.pushNamed(context, '/camera');
         },
         elevation: 0,
-        shape: CircleBorder(),
-        child: Icon(
+        shape: const CircleBorder(),
+        child: const Icon(
           Icons.camera_alt_outlined,
           color: Colors.white,
         ),
@@ -204,7 +250,7 @@ class _ProfileState extends State<Profile> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
