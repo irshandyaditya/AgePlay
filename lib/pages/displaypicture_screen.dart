@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:age_play/pages/search.dart';
 import 'package:flutter/material.dart';
 
 class DisplayPictureScreen extends StatelessWidget {
@@ -125,7 +126,10 @@ class DisplayPictureScreen extends StatelessWidget {
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          // Aksi tombol lainnya
+                          Navigator.push(
+                            context, 
+                            MaterialPageRoute(builder: (context) => SearchPage(previousPage: 'hasil deteksi',)),
+                          );
                         },
                         child: Text("Lainnya"),
                         style: ElevatedButton.styleFrom(
