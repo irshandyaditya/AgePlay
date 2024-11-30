@@ -76,8 +76,8 @@ class _BookmarkPageState extends State<BookmarkPage> {
               children: [
                 // Game image
                 Container(
-                  width: 120,
-                  height: 70,
+                  width: 130,
+                  height: 78,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     image: DecorationImage(
