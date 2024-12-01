@@ -29,24 +29,37 @@ class _LoginPageState extends State<LoginPage> {
     const String apiUrl = 'https://polinemaesports.my.id/api/akun/login/';
 
     try {
-      var request = http.MultipartRequest('POST', Uri.parse(apiUrl));
-      request.fields['email'] = _emailController.text;
-      request.fields['password'] = _passwordController.text;
+    // Gunakan MultipartRequest untuk mendukung format sebelumnya
+    var request = http.MultipartRequest('POST', Uri.parse(apiUrl));
+    request.fields['email'] = _emailController.text;
+    request.fields['password'] = _passwordController.text;
 
-      var response = await request.send();
+    var response = await request.send();
 
-      if (response.statusCode == 200) {
-        final responseData =
-            jsonDecode(await response.stream.bytesToString());
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(await response.stream.bytesToString());
 
-        if (responseData['status'] == 'success') {
-          // Simpan data ke Secure Storage
-          await storage.write(key: 'auth_token', value: responseData['token']);
-          await storage.write(key: 'name', value: responseData['user']['name']);
-          await storage.write(key: 'email', value: responseData['user']['email']);
+      if (responseData['status'] == 'success') {
+        // Simpan data ke Secure Storage
+        String? csrfToken = response.headers['set-cookie']
+            ?.split(';')
+            .firstWhere((cookie) => cookie.contains('csrftoken'), orElse: () => '')
+            .split('=')
+            .last;
 
-          // Arahkan ke halaman Home
-          Navigator.pushNamed(context, '/home');
+        String? sessionId = response.headers['set-cookie']
+            ?.split(';')
+            .firstWhere((cookie) => cookie.contains('sessionid'), orElse: () => '')
+            .split('=')
+            .last;
+
+        await storage.write(key: 'auth_token', value: responseData['token']);
+        await storage.write(key: 'csrf_token', value: csrfToken);
+        await storage.write(key: 'session_id', value: sessionId);
+        await storage.write(key: 'name', value: responseData['user']['name']);
+        await storage.write(key: 'email', value: responseData['user']['email']);
+
+        Navigator.pushNamed(context, '/home');
         } else {
           setState(() {
             _errorMessage = responseData['message'] ?? 'Login failed';
