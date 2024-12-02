@@ -28,6 +28,7 @@ class _EditProfileState extends State<EditProfile> {
   late String _email;
   String _password = '';
   late String _profilePicture;
+  late String newProfilePicture;
 
   File? _image;
   bool _isLoading = false;
@@ -102,7 +103,8 @@ class _EditProfileState extends State<EditProfile> {
             await storage.write(key: 'email', value: _email);
             if (_image != null) {
               // Jika foto profil diperbarui, simpan URL atau path baru
-              await storage.write(key: 'foto_profil', value: _image!.path);
+              newProfilePicture = jsonResponse['foto_profil'];
+              await storage.write(key: 'foto_profil', value: newProfilePicture);
             } else {
               await storage.write(key: 'foto_profil', value: _profilePicture);
             }
