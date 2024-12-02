@@ -152,6 +152,17 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     }
   }
 
+  Future<void> _pickImage(bool fromCamera) async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: fromCamera ? ImageSource.camera : ImageSource.gallery,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -234,39 +245,17 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              Expanded(
-                                child: Center(
-                                  child: Text(
-                                    "Video",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Center(
-                                  child: Text(
-                                    "Photo",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Center(
-                                  child: Text(
-                                    "Pro Mode",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              // Expanded(
+                              //   child: Center(
+                              //     child: Text(
+                              //       "Video",
+                              //       style: TextStyle(
+                              //         color: Colors.white,
+                              //         fontWeight: FontWeight.bold,
+                              //       ),
+                              //     ),
+                              //   ),
+                              // ),
                             ],
                           ),
                         ),
@@ -276,7 +265,14 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                             children: [
                               Row(
                                 children: [
-                                  Expanded(child: Container()),
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        _pickImage(false);
+                                      },
+                                      child: Icon(Icons.image_outlined, color: Colors.white, size: 50),
+                                    ),
+                                  ),
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () async {
