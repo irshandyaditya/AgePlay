@@ -18,6 +18,8 @@ class _SearchPageState extends State<SearchPage> {
   List<Map<String, dynamic>> searchResults = [];
   int _currentIndex = 1;
   bool _isLoading = false;
+  bool _isFilterApplied = false;
+  Map<String, String>? _filterData; // Store applied filter data (age, category)
 
   @override
   void initState() {
@@ -49,14 +51,16 @@ class _SearchPageState extends State<SearchPage> {
               'slug': item['slug'],
               'name': item['name'],
               'platforms': item['platforms']
-                  ?.map((p) => p['platform']['name'])
-                  ?.toList()
-                  ?.join(', ') ?? 'Unknown',
+                      ?.map((p) => p['platform']['name'])
+                      ?.toList()
+                      ?.join(', ') ??
+                  'Unknown',
               'rating': item['rating'] ?? 'N/A',
               'genres': item['genres']
-                  ?.map((g) => g['name'])
-                  ?.toList()
-                  ?.join(', ') ?? 'N/A',
+                      ?.map((g) => g['name'])
+                      ?.toList()
+                      ?.join(', ') ??
+                  'N/A',
               'esrb_rating': item['esrb_rating']?['name'] ?? 'N/A',
               'screenshot': item['short_screenshots']?.firstWhere(
                       (s) => s['id'] == -1,
@@ -77,15 +81,30 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
+  void _applyFilter() {
+  Navigator.pushNamed(context, '/filter').then((result) {
+    print('Result from filter: $result'); // Debug statement
+    if (result != null && result is Map<String, String>) {
+      setState(() {
+        _isFilterApplied = true; // Filter is applied
+        _filterData = result;   // Store selected filter data
+      });
+    }
+  });
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Search bar
+          // Padding to avoid overlap with status bar
+          SizedBox(height: MediaQuery.of(context).padding.top + 8),
+          // Search bar with filter button
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               children: [
                 Expanded(
@@ -123,9 +142,55 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                   ),
                 ),
+                SizedBox(width: 8),
+                // Filter button
+                Container(
+                  decoration: BoxDecoration(
+                    color: _isFilterApplied
+                        ? Colors.red
+                        : const Color(0xFFE6EAEE),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: IconButton(
+                    onPressed: _applyFilter,
+                    icon: Icon(Icons.tune_rounded,
+                        color: _isFilterApplied ? Colors.white : Colors.black),
+                  ),
+                ),
               ],
             ),
           ),
+          if (_isFilterApplied && _filterData != null) ...[
+            // Show applied filter info
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Filter: ${_filterData!['category']}, Age ${_filterData!['age']}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.clear, color: Colors.red),
+                    onPressed: () {
+                      setState(() {
+                        _isFilterApplied = false;
+                        _filterData = null;
+                        searchResults.clear(); // clear seluruh result dan search 
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
           Expanded(
             child: _isLoading
                 ? Center(child: CircularProgressIndicator())
@@ -148,8 +213,8 @@ class _SearchPageState extends State<SearchPage> {
                               children: [
                                 // Game image
                                 Container(
-                                  width: 130,
-                                  height: 78,
+                                  width: MediaQuery.of(context).size.width * 0.3,
+                                  height: MediaQuery.of(context).size.height * 0.09,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
                                     image: DecorationImage(
@@ -178,31 +243,41 @@ class _SearchPageState extends State<SearchPage> {
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      Text(
-                                        "Rating: ${result["rating"]}",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.green,
-                                        ),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.star, 
+                                            color: Colors.orange, 
+                                            size: 15
+                                          ),
+                                          SizedBox(width: 5,),
+                                          Text(
+                                            "${result["rating"]}",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.orange,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                       Text(
                                         "Platforms: ${result["platforms"]}",
                                         style: TextStyle(
-                                          fontSize: 14,
+                                          fontSize: 13,
                                           color: Colors.black87,
                                         ),
                                       ),
                                       Text(
                                         "Genres: ${result["genres"]}",
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 11,
                                           color: Colors.grey,
                                         ),
                                       ),
                                       Text(
                                         "ESRB: ${result["esrb_rating"]}",
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 11,
                                           color: Colors.grey,
                                         ),
                                       ),
