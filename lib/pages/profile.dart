@@ -28,13 +28,13 @@ class _ProfileState extends State<Profile> {
     final name = await storage.read(key: 'name'); // Nama user
     final email = await storage.read(key: 'email'); // Email user
     final password = await storage.read(key: 'password'); // Password user
-    final profilePicture = await storage.read(key: 'profile_picture'); // Foto profil user
+    final profilePicture = await storage.read(key: 'foto_profil'); // Foto profil user
 
     setState(() {
       _name = name ?? 'Unknown';
       _email = email ?? 'Unknown';
       _password = password ?? '****'; // Jika tidak ada, tampilkan default
-      _profilePicture = profilePicture; // Jika tidak ada, akan ditangani di UI
+      _profilePicture = 'https://polinemaesports.my.id/$profilePicture'; // Jika tidak ada, akan ditangani di UI
     });
   }
 

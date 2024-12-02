@@ -58,6 +58,7 @@ class _LoginPageState extends State<LoginPage> {
         await storage.write(key: 'session_id', value: sessionId);
         await storage.write(key: 'name', value: responseData['user']['name']);
         await storage.write(key: 'email', value: responseData['user']['email']);
+        await storage.write(key: 'foto_profil', value: responseData['user']['foto_profil']);
 
         Navigator.pushNamed(context, '/home');
         } else {
