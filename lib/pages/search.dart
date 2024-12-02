@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:age_play/widgets/bottom_navbar.dart';
 
 class SearchPage extends StatefulWidget {
@@ -13,32 +15,9 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  List<Map<String, String>> searchResults = [];
+  List<Map<String, dynamic>> searchResults = [];
   int _currentIndex = 1;
-
-  final List<Map<String, String>> allItems = [
-    {
-      "title": "Persona 3 Reload",
-      "price": "Rp 779.000",
-      "developer": "ATLUS",
-      "tags": "JRPG, RPG, Anime, Adventure",
-      "image": "assets/persona3.jpg",
-    },
-    {
-      "title": "Horizon Forbidden West",
-      "price": "Rp 899.000",
-      "developer": "Guerrilla Games",
-      "tags": "Action, RPG, Open World",
-      "image": "assets/horizon.jpg",
-    },
-    {
-      "title": "Red Dead Redemption 2",
-      "price": "Rp 699.000",
-      "developer": "Rockstar Games",
-      "tags": "Action, Adventure, Open World",
-      "image": "assets/red_dead.jpg",
-    },
-  ];
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -48,29 +27,58 @@ class _SearchPageState extends State<SearchPage> {
         _searchQuery = _searchController.text;
       });
     });
-
-    // Jika halaman sebelumnya adalah "hasil deteksi", tampilkan semua item
-    if (widget.previousPage == 'hasil deteksi') {
-      searchResults = List.from(allItems);
-    }
   }
 
-  void _performSearch() {
+  Future<void> _performSearch() async {
+    if (_searchQuery.isEmpty) return;
+
     setState(() {
-      searchResults = allItems
-          .where((item) =>
-              item["title"]!.toLowerCase().contains(_searchQuery.toLowerCase()))
-          .toList();
+      _isLoading = true;
+    });
+
+    final url =
+        'https://polinemaesports.my.id/api/game-search/?query=${Uri.encodeComponent(_searchQuery)}';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> results = data['results'];
+        setState(() {
+          searchResults = results.map((item) {
+            return {
+              'slug': item['slug'],
+              'name': item['name'],
+              'platforms': item['platforms']
+                  ?.map((p) => p['platform']['name'])
+                  ?.toList()
+                  ?.join(', ') ?? 'Unknown',
+              'rating': item['rating'] ?? 'N/A',
+              'genres': item['genres']
+                  ?.map((g) => g['name'])
+                  ?.toList()
+                  ?.join(', ') ?? 'N/A',
+              'esrb_rating': item['esrb_rating']?['name'] ?? 'N/A',
+              'screenshot': item['short_screenshots']?.firstWhere(
+                      (s) => s['id'] == -1,
+                      orElse: () => null)?['image'] ??
+                  'https://via.placeholder.com/150', // Default image
+            };
+          }).toList();
+        });
+      } else {
+        print("Failed to fetch data. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+
+    setState(() {
+      _isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Header dinamis berdasarkan halaman sebelumnya
-    String displayText = widget.previousPage == 'hasil deteksi'
-        ? 'Face Recognition: Age 21'
-        : 'Search: $_searchQuery';
-
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,12 +115,7 @@ class _SearchPageState extends State<SearchPage> {
                             setState(() {
                               _searchController.clear();
                               _searchQuery = '';
-                              if (widget.previousPage == 'hasil deteksi') {
-                                // Reset ke semua item jika halaman sebelumnya "hasil deteksi"
-                                searchResults = List.from(allItems);
-                              } else {
-                                searchResults.clear();
-                              }
+                              searchResults.clear();
                             });
                           },
                         ),
@@ -120,37 +123,13 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                   ),
                 ),
-                SizedBox(width: 16),
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE6EAEE),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.filter_alt,
-                    color: const Color(0xFF808080),
-                  ),
-                ),
               ],
             ),
           ),
-          if (_searchQuery.isNotEmpty || widget.previousPage == 'hasil deteksi') ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                displayText,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ],
           Expanded(
-            child: widget.previousPage == 'hasil deteksi' || _searchQuery.isNotEmpty
-                ? (searchResults.isEmpty
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : searchResults.isEmpty
                     ? Center(
                         child: Text(
                           "No results found",
@@ -174,14 +153,14 @@ class _SearchPageState extends State<SearchPage> {
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
                                     image: DecorationImage(
-                                      image: AssetImage(result["image"]!),
+                                      image: NetworkImage(result["screenshot"]),
                                       fit: BoxFit.cover,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.5), // Warna shadow
-                                        blurRadius: 8, // Tingkat blur
-                                        offset: Offset(0, 4), // Posisi shadow
+                                        color: Colors.black.withOpacity(0.5),
+                                        blurRadius: 8,
+                                        offset: Offset(0, 4),
                                       ),
                                     ],
                                   ),
@@ -190,39 +169,42 @@ class _SearchPageState extends State<SearchPage> {
                                 // Game info
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        result["title"]!,
+                                        result["name"],
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       Text(
-                                        result["price"]!,
+                                        "Rating: ${result["rating"]}",
                                         style: TextStyle(
                                           fontSize: 16,
                                           color: Colors.green,
                                         ),
                                       ),
-                                      SizedBox(height: 8,),
                                       Text(
-                                        result["developer"]!,
+                                        "Platforms: ${result["platforms"]}",
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: Colors.black87,
                                         ),
                                       ),
                                       Text(
-                                        result["tags"]!,
+                                        "Genres: ${result["genres"]}",
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: Colors.grey,
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        "ESRB: ${result["esrb_rating"]}",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -231,20 +213,7 @@ class _SearchPageState extends State<SearchPage> {
                             ),
                           );
                         },
-                      ))
-                : Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.search, size: 64, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text(
-                          "Find the game you want here",
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
           ),
         ],
       ),
@@ -258,7 +227,7 @@ class _SearchPageState extends State<SearchPage> {
           Icons.camera_alt_outlined,
           color: Colors.white,
         ),
-        backgroundColor: Colors.red, // Red color for the central button
+        backgroundColor: Colors.red,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomNavBarWidget(
