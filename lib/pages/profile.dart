@@ -34,7 +34,7 @@ class _ProfileState extends State<Profile> {
       _name = name ?? 'Unknown';
       _email = email ?? 'Unknown';
       _password = password ?? '****'; // Jika tidak ada, tampilkan default
-      _profilePicture = 'https://polinemaesports.my.id/$profilePicture'; // Jika tidak ada, akan ditangani di UI
+      _profilePicture = profilePicture; // Jika tidak ada, akan ditangani di UI
     });
   }
 
@@ -103,7 +103,7 @@ class _ProfileState extends State<Profile> {
                   CircleAvatar(
                     radius: 35,
                     backgroundImage: _profilePicture != null
-                        ? NetworkImage(_profilePicture!) // Jika ada foto profil
+                        ? NetworkImage('https://polinemaesports.my.id/$_profilePicture') // Jika ada foto profil
                         : const AssetImage('assets/foto_profil.png')
                             as ImageProvider, // Default foto profil
                   ),

@@ -172,7 +172,7 @@ class _EditProfileState extends State<EditProfile> {
                     backgroundImage: _image != null
                         ? FileImage(_image!)
                         : (_profilePicture.isNotEmpty
-                                ? NetworkImage(_profilePicture)
+                                ? NetworkImage('https://polinemaesports.my.id/$_profilePicture')
                                 : const AssetImage('assets/foto_profil.png'))
                             as ImageProvider,
                   ),
@@ -203,9 +203,9 @@ class _EditProfileState extends State<EditProfile> {
                       onSaved: (value) => _email = value!,
                       keyboardType: TextInputType.emailAddress,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 64),
                     _buildEditableField(
-                      label: 'Password',
+                      label: 'Input Password',
                       isPassword: true,
                       onSaved: (value) => _password = value ?? '',
                     ),
@@ -213,7 +213,6 @@ class _EditProfileState extends State<EditProfile> {
                 ),
               ),
               const SizedBox(height: 24.0),
-              // Save Button with loading indicator
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 16.0),
