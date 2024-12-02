@@ -76,9 +76,7 @@ class _EditProfileState extends State<EditProfile> {
         // Tambahkan data form
         request.fields['nama'] = _name;
         request.fields['email'] = _email;
-        if (_password.isNotEmpty) {
-          request.fields['password'] = _password;
-        }
+        request.fields['password'] = _password;
         request.fields['token'] = authToken;
 
         // Tambahkan file jika ada

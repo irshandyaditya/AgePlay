@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:convert';
 import 'dart:io';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ChangePassword extends StatefulWidget {
-  final String password;
+  final String currentPassword;
 
-  const ChangePassword({
-    required this.password,
-  });
+  const ChangePassword({required this.currentPassword});
 
   @override
   _ChangePasswordState createState() => _ChangePasswordState();
@@ -20,100 +17,69 @@ class _ChangePasswordState extends State<ChangePassword> {
   final storage = const FlutterSecureStorage();
   final _formKey = GlobalKey<FormState>();
 
-  String _password = '';
-  late String _email = 'unknown';
-  late String _name = 'unknown';
-
-  File? _image;
+  String _currentPassword = '';
+  String _newPassword = '';
+  String _confirmNewPassword = '';
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _password = widget.password;
+    _currentPassword = widget.currentPassword;
   }
 
-  Future<void> _pickImage(bool fromCamera) async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: fromCamera ? ImageSource.camera : ImageSource.gallery,
-    );
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
-    }
-  }
-
-  Future<void> _saveProfile() async {
+  Future<void> _savePassword() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+
+      if (_newPassword != _confirmNewPassword) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("New Password and Confirmation Password do not match"),
+          ),
+        );
+        return;
+      }
 
       setState(() {
         _isLoading = true;
       });
 
       try {
-        // Ambil auth_token dari storage
+        // Ambil token autentikasi
         final authToken = await storage.read(key: "auth_token");
 
         if (authToken == null) {
-          throw Exception("Token tidak ditemukan. Silakan login ulang.");
+          throw Exception("Authentication token not found. Please log in again.");
         }
 
-        // Kirim data ke API
+        // Kirim data ke API dengan multipart request
         final uri =
-            Uri.parse("https://polinemaesports.my.id/api/akun/edit-profile/");
+            Uri.parse("https://polinemaesports.my.id/api/akun/edit-password/");
         final request = http.MultipartRequest("POST", uri);
 
-        // Tambahkan data form
-        request.fields['nama'] = _name;
-        request.fields['email'] = _email;
-        if (_password.isNotEmpty) {
-          request.fields['password'] = _password;
-        }
         request.fields['token'] = authToken;
+        request.fields['password'] = _currentPassword;
+        request.fields['new_password'] = _newPassword;
 
-        // Tambahkan file jika ada
-        if (_image != null) {
-          request.files.add(await http.MultipartFile.fromPath(
-            'foto_profil',
-            _image!.path,
-          ));
-        } else {
-          request.fields['foto_profil'] = 'null';
-        }
-
+        // Kirim request dan tangani response
         final response = await request.send();
 
         if (response.statusCode == 200) {
           final responseBody = await response.stream.bytesToString();
           final jsonResponse = json.decode(responseBody);
 
-          if (jsonResponse['message'] == 'Profile updated successfully') {
-            // Menyimpan perubahan profil ke FlutterSecureStorage
-            await storage.write(key: 'name', value: _name);
-            await storage.write(key: 'email', value: _email);
-            // if (_image != null) {
-            //   // Jika foto profil diperbarui, simpan URL atau path baru
-            //   newProfilePicture = jsonResponse['foto_profil'];
-            //   await storage.write(key: 'foto_profil', value: newProfilePicture);
-            // } else {
-            //   await storage.write(key: 'foto_profil', value: _profilePicture);
-            // }
-
+          if (jsonResponse['message'] == 'Password updated successfully') {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Profil berhasil diperbarui")),
+              const SnackBar(content: Text("Password updated successfully")),
             );
-
-            // Navigasi ke halaman profil
             Navigator.pushNamed(context, '/profile');
           } else {
-            throw Exception(
-                jsonResponse['error'] ?? "Gagal memperbarui profil.");
+            throw Exception(jsonResponse['error'] ?? "Failed to update password");
           }
         } else {
           throw Exception(
-              "Gagal memperbarui profil. Status: ${response.statusCode}");
+              "Failed to update password. Status code: ${response.statusCode}");
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -127,22 +93,20 @@ class _ChangePasswordState extends State<ChangePassword> {
     }
   }
 
-  Widget _buildEditableField({
+  Widget _buildPasswordField({
     required String label,
-    String? initialValue,
-    bool isPassword = false,
-    TextInputType keyboardType = TextInputType.text,
+    required bool isPassword,
     required void Function(String?) onSaved,
+    String? Function(String?)? validator,
   }) {
     return TextFormField(
-      initialValue: initialValue,
       obscureText: isPassword,
-      keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
       ),
       onSaved: onSaved,
+      validator: validator,
     );
   }
 
@@ -157,66 +121,82 @@ class _ChangePasswordState extends State<ChangePassword> {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              const SizedBox(height: 24),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    _buildEditableField(
-                      label: 'Current Password',
-                      isPassword: true,
-                      onSaved: (value) => _password = value ?? '',
-                    ),
-                    const SizedBox(height: 16),
-                    _buildEditableField(
-                      label: 'New Password',
-                      isPassword: true,
-                      onSaved: (value) => '',
-                    ),
-                    const SizedBox(height: 16),
-                    _buildEditableField(
-                      label: 'Confirmation New Password',
-                      isPassword: true,
-                      onSaved: (value) => _password = value ?? '',
-                    ),
-                  ],
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                _buildPasswordField(
+                  label: 'Current Password',
+                  isPassword: true,
+                  onSaved: (value) => _currentPassword = value ?? '',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Current Password is required';
+                    }
+                    return null;
+                  },
                 ),
-              ),
-              const SizedBox(height: 24.0),
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _saveProfile,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                const SizedBox(height: 16),
+                _buildPasswordField(
+                  label: 'New Password',
+                  isPassword: true,
+                  onSaved: (value) => _newPassword = value ?? '',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'New Password is required';
+                    }
+                    if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildPasswordField(
+                  label: 'Confirm New Password',
+                  isPassword: true,
+                  onSaved: (value) => _confirmNewPassword = value ?? '',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Confirmation Password is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24.0),
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _savePassword,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Save',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text(
-                          'Save',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

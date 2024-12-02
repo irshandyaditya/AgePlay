@@ -193,7 +193,7 @@ class _ProfileState extends State<Profile> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => ChangePassword(
-                            password: _password ?? '',
+                            currentPassword: _password ?? '',
                           ),
                         ),
                       );
