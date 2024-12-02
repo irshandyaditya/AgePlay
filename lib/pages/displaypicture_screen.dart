@@ -10,7 +10,8 @@ class DisplayPictureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final screen = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: AppBar(
@@ -34,8 +35,8 @@ class DisplayPictureScreen extends StatelessWidget {
             SizedBox(height: 15),
             // Menampilkan gambar dengan bingkai
             Container(
-              width: 170,
-              height: 240,
+              width: screenWidth * 0.4,
+              height: screenHeight * 0.26,
               decoration: BoxDecoration(
                 // border: Border.all(color: Colors.blue, width: 3), // Border biru
                 borderRadius: BorderRadius.circular(12), // Melengkung
@@ -48,7 +49,7 @@ class DisplayPictureScreen extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 60),
+            SizedBox(height: screenHeight * 0.05),
             // Informasi Deteksi
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -78,11 +79,11 @@ class DisplayPictureScreen extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 30),
+            SizedBox(height: screenHeight * 0.04),
             // Rekomendasi Game
             SizedBox(
               child: Container(
-                width: screen * 0.8,
+                width: screenWidth * 0.8,
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(1000, 223, 223, 223), // Background abu-abu muda
@@ -168,6 +169,10 @@ class GameRecommendation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Row(
       children: [
         Container(
@@ -186,8 +191,8 @@ class GameRecommendation extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
               imageName,
-              width: 120,
-              height: 70,
+              width: screenWidth * 0.3,
+              height: screenHeight * 0.075,
               fit: BoxFit.cover,
             ),
           ),
