@@ -32,6 +32,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   double _currentZoom = 1.0;
   File? _capturedImage;
   bool isLoading = false; // Menambahkan variabel isLoading
+  File? _image;
 
   @override
   void initState() {

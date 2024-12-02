@@ -1,3 +1,4 @@
+import 'package:age_play/pages/change_password.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:age_play/widgets/bottom_navbar.dart';
@@ -165,11 +166,6 @@ class _ProfileState extends State<Profile> {
                         _buildDetailRow('Nama', _name ?? 'Loading...'),
                         const SizedBox(height: 16),
                         _buildDetailRow('Email', _email ?? 'Loading...'),
-                        const SizedBox(height: 16),
-                        _buildDetailRow(
-                          'Password',
-                          '*' * (_password?.length ?? 10), // Sembunyikan password
-                        ),
                       ],
                     ),
                   ),
@@ -177,6 +173,35 @@ class _ProfileState extends State<Profile> {
               ),
             ),
             const SizedBox(height: 8.0),
+            // Change Password Section
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.grey[300]!, width: 1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: ListTile(
+                title: const Text(
+                  'Change Password',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChangePassword(
+                            password: _password ?? '',
+                          ),
+                        ),
+                      );
+                },
+              ),
+            ),
+            const SizedBox(height: 8.0),
+
             // About Us Section
             Container(
               decoration: BoxDecoration(
