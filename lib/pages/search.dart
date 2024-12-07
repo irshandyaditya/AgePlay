@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:age_play/widgets/bottom_navbar.dart';
+import 'package:age_play/pages/game_detail.dart';
 
 class SearchPage extends StatefulWidget {
   final String? previousPage;
@@ -205,12 +206,20 @@ class _SearchPageState extends State<SearchPage> {
                         padding: EdgeInsets.symmetric(horizontal: 0),
                         itemCount: searchResults.length,
                         itemBuilder: (context, index) {
-                          final result = searchResults[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 16.0),
-                            child: Row(
-                              children: [
+                        final result = searchResults[index];
+                        return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GameDetailsPage(slug: result["slug"]),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                          child: Row(
+                            children: [
                                 // Game image
                                 Container(
                                   width: MediaQuery.of(context).size.width * 0.3,
@@ -286,6 +295,7 @@ class _SearchPageState extends State<SearchPage> {
                                 ),
                               ],
                             ),
+                          ),
                           );
                         },
                       ),

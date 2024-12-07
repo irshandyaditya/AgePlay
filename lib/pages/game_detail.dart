@@ -1,8 +1,50 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class GameDetailsPage extends StatelessWidget {
+class GameDetailsPage extends StatefulWidget {
+  final String slug;
+
+  GameDetailsPage({required this.slug});
+  
+  @override
+  _GameDetailsPageState createState() => _GameDetailsPageState();
+}
+
+class _GameDetailsPageState extends State<GameDetailsPage> {
+  Map<String, dynamic>? gameDetails;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchGameDetails();
+  }
+
+  Future<void> fetchGameDetails() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://polinemaesports.my.id/api/game-details/${widget.slug}'),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          gameDetails = json.decode(response.body);
+        });
+      } else {
+        throw Exception('Failed to load game details');
+      }
+    } catch (e) {
+      print('Error fetching game details: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (gameDetails == null) {
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -10,55 +52,46 @@ class GameDetailsPage extends StatelessWidget {
           children: [
             Stack(
               children: [
-                // Gambar latar belakang
+                // Background image
                 Container(
-                  height: MediaQuery.of(context).size.height *
-                      0.5, // Setengah layar
+                  height: MediaQuery.of(context).size.height * 0.3,
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage(
-                          'assets/tekken.png'), // Ganti dengan path gambar Anda
+                      image:
+                          NetworkImage(gameDetails?['background_image'] ?? ''),
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
-                // Icon Back, Send, dan Love di atas gambar
+                // Icons on top of the image
                 Positioned(
-                  top:
-                      40, // Jarak dari atas layar (untuk menyesuaikan dengan status bar)
+                  top: 40,
                   left: 16,
                   right: 16,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Icon Back
                       GestureDetector(
                         onTap: () {
-                          Navigator.pop(
-                              context); // Kembali ke halaman sebelumnya
+                          Navigator.pop(context);
                         },
                         child: Container(
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(
-                                0.5), // Background gelap transparan
+                            color: Colors.black.withOpacity(0.5),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.arrow_back,
-                            color: Colors.red, // Warna merah
+                            color: Colors.red,
                           ),
                         ),
                       ),
-                      // Icon Send dan Love
                       Row(
                         children: [
-                          // Icon Send
                           GestureDetector(
-                            onTap: () {
-                              // Tambahkan logika ketika icon Send ditekan
-                            },
+                            onTap: () {},
                             child: Container(
                               width: 40,
                               height: 40,
@@ -69,15 +102,12 @@ class GameDetailsPage extends StatelessWidget {
                               ),
                               child: Icon(
                                 Icons.send,
-                                color: Colors.red, // Warna merah
+                                color: Colors.red,
                               ),
                             ),
                           ),
-                          // Icon Love
                           GestureDetector(
-                            onTap: () {
-                              // Tambahkan logika ketika icon Love ditekan
-                            },
+                            onTap: () {},
                             child: Container(
                               width: 40,
                               height: 40,
@@ -87,7 +117,7 @@ class GameDetailsPage extends StatelessWidget {
                               ),
                               child: Icon(
                                 Icons.favorite_border,
-                                color: Colors.red, // Warna merah
+                                color: Colors.red,
                               ),
                             ),
                           ),
@@ -98,21 +128,40 @@ class GameDetailsPage extends StatelessWidget {
                 ),
               ],
             ),
-            // Konten di bawah gambar
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Nama Game dan Developer
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // ESRB Rating Box
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors
+                                  .redAccent, // Warna latar belakang kotak
+                              borderRadius: BorderRadius.circular(
+                                  8), // Membuat sudut melengkung
+                            ),
+                            child: Text(
+                              gameDetails?['esrb_rating']?['name'] ??
+                                  '13+', // Menampilkan ESRB Rating atau N/A jika null
+                              style: TextStyle(
+                                color: Colors.white, // Warna teks
+                                fontSize: 14, // Ukuran teks
+                                fontWeight: FontWeight.bold, // Teks lebih tebal
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8),
                           Text(
-                            'TEKKEN 8',
+                            gameDetails?['name'] ?? 'Unknown',
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -120,7 +169,9 @@ class GameDetailsPage extends StatelessWidget {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Bandai Namco',
+                            (gameDetails?['publishers']?.isNotEmpty ?? false)
+                                ? gameDetails!['publishers'][0]['name']
+                                : 'Unknown Publisher',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey,
@@ -128,7 +179,6 @@ class GameDetailsPage extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // Rating
                       Row(
                         children: [
                           Icon(
@@ -138,7 +188,7 @@ class GameDetailsPage extends StatelessWidget {
                           ),
                           SizedBox(width: 4),
                           Text(
-                            '4.3',
+                            (gameDetails?['rating'] ?? 0).toString(),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -149,108 +199,38 @@ class GameDetailsPage extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 16),
-
-                  // Barisan Ikon dan Label
+                  // Genres and ESRB Rating
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      // Arcade Icon
-                      Column(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(12),
+                      for (var genre in gameDetails?['genres'] ?? [])
+                        Column(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.sports_esports,
+                                color: Colors.white,
+                                size: 30,
+                              ),
                             ),
-                            child: Icon(
-                              Icons.sports_esports, // Ikon Arcade
-                              color: Colors.white,
-                              size: 30,
+                            SizedBox(height: 4),
+                            Text(
+                              genre['name'] ?? '',
+                              style: TextStyle(fontSize: 14),
                             ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Arcade',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ],
-                      ),
-                      // 16+ Icon
-                      Column(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.whatshot, // Ikon 16+
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            '16+',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ],
-                      ),
-                      // Multiplayer Icon
-                      Column(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.group, // Ikon Multiplayer
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Multiplayer',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ],
-                      ),
-                      // Fighting Icon
-                      Column(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.sports_mma, // Ikon Fighting
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Fighting',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
                     ],
                   ),
                   SizedBox(height: 24),
                   Text(
-                    'PC Requirements:',
+                    'Spec Requirements:',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -258,14 +238,9 @@ class GameDetailsPage extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    '''
-Minimum:
-- OS: Windows 10 64-bit
-- Processor: Intel Core i5-6600K / AMD Ryzen 5 1600
-- Memory: 8 GB RAM
-- Graphics: Nvidia GTX 1050Ti / AMD Radeon RX 380X
-- DirectX: Version 12
-                    ''',
+                    gameDetails?['platforms']?[0]?['requirements']
+                            ?['minimum'] ??
+                        'N/A',
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.5,
@@ -273,17 +248,45 @@ Minimum:
                   ),
                   SizedBox(height: 8),
                   Text(
-                    '''
-Recommended:
-- OS: Windows 10 64-bit
-- Processor: Intel Core i7 / AMD Ryzen 7
-- Memory: 16 GB RAM
-- Graphics: Nvidia RTX 3060 / AMD RX 6700 XT
-- DirectX: Version 12
-                    ''',
+                    gameDetails?['platforms']?[0]?['requirements']
+                            ?['recommended'] ??
+                        'N/A',
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.5,
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  Text(
+                    'Description:',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    gameDetails?['description_raw'] ??
+                        'No description available.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.5,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Website:',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    gameDetails?['website'] ?? 'N/A',
+                    style: TextStyle(
+                      fontSize: 14,
+                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ],
@@ -291,27 +294,6 @@ Recommended:
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class CategoryBadge extends StatelessWidget {
-  final String title;
-
-  const CategoryBadge(this.title);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.redAccent,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        title,
-        style: TextStyle(color: Colors.white, fontSize: 12),
       ),
     );
   }

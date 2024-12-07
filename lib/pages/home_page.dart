@@ -232,7 +232,7 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => GameDetailsPage()),
+          MaterialPageRoute(builder: (context) => GameDetailsPage(slug: 'tekken-8')),
         );
       },
       child: Padding(
