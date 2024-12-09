@@ -1,18 +1,33 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
 
 class GameDetailsPage extends StatefulWidget {
   final String slug;
 
   GameDetailsPage({required this.slug});
-  
+
   @override
   _GameDetailsPageState createState() => _GameDetailsPageState();
 }
 
 class _GameDetailsPageState extends State<GameDetailsPage> {
   Map<String, dynamic>? gameDetails;
+  List<dynamic>? storeLinks;
+  final Map<int, String> storeNames = {
+    1: 'Steam',
+    2: 'Xbox Store',
+    3: 'PlayStation Store',
+    4: 'App Store',
+    5: 'GOG',
+    6: 'Nintendo Store',
+    7: 'Xbox 360 Store',
+    8: 'Google Play',
+    9: 'itch.io',
+    11: 'Epic Games',
+  };
 
   @override
   void initState() {
@@ -21,25 +36,133 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
   }
 
   Future<void> fetchGameDetails() async {
+    setState(() {
+      gameDetails = null; // Reset game details
+      storeLinks = null; // Reset store links
+    });
+
     try {
-      final response = await http.get(
-        Uri.parse('https://polinemaesports.my.id/api/game-details/${widget.slug}'),
-      );
-      if (response.statusCode == 200) {
+      final responses = await Future.wait([
+        http.get(Uri.parse(
+            'https://polinemaesports.my.id/api/game-details/${widget.slug}')),
+        http.get(Uri.parse(
+            'https://polinemaesports.my.id/api/game-storelinks/${widget.slug}')),
+      ]);
+
+      if (responses[0].statusCode == 200 && responses[1].statusCode == 200) {
         setState(() {
-          gameDetails = json.decode(response.body);
+          gameDetails = json.decode(responses[0].body);
+          final storeData = json.decode(responses[1].body);
+          storeLinks = storeData['results'] ?? []; // Ambil store links
         });
       } else {
-        throw Exception('Failed to load game details');
+        throw Exception('Failed to fetch data');
       }
     } catch (e) {
-      print('Error fetching game details: $e');
+      print('Error fetching data: $e');
+      setState(() {
+        gameDetails = {}; // Set sebagai default kosong
+        storeLinks = [];
+      });
+    }
+  }
+
+  Future<bool> doesAssetExist(String assetPath) async {
+    try {
+      await rootBundle.load(assetPath);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<List<Widget>> _buildPlatformIcons(List<dynamic>? platforms) async {
+    if (platforms == null) return [];
+
+    List<Widget> icons = [];
+    for (var platform in platforms) {
+      final platformSlug = platform['platform']['slug'];
+      final assetPath = 'assets/icons/$platformSlug.png';
+
+      if (await doesAssetExist(assetPath)) {
+        icons.add(
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Image.asset(
+              assetPath,
+              width: 20,
+              height: 20,
+            ),
+          ),
+        );
+      }
+    }
+
+    return icons;
+  }
+
+  Future<List<Widget>> _buildCategoryIcons(List<dynamic>? genres) async {
+    if (genres == null) return [];
+
+    List<Widget> categories = [];
+    for (var genre in genres) {
+      final genreSlug = genre['slug']; // Mengambil slug genre
+      final genrePath = 'assets/categories/$genreSlug.png';
+
+      // Memeriksa apakah aset ada
+      final assetExists = await doesAssetExist(genrePath);
+
+      categories.add(
+        Column(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: EdgeInsets.all(14),
+              child: assetExists
+                  ? Image.asset(
+                      genrePath,
+                      width: 20,
+                      height: 20,
+                      fit: BoxFit.contain,
+                    )
+                  : Icon(
+                      Icons.sports_esports,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              genre['name'] ?? '',
+              style: TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return categories;
+  }
+
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+
+    if (!await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication, // Membuka aplikasi eksternal
+    )) {
+      throw 'Could not launch $url';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (gameDetails == null) {
+    if (gameDetails == null || storeLinks == null) {
       return Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
@@ -95,28 +218,12 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                             child: Container(
                               width: 40,
                               height: 40,
-                              margin: EdgeInsets.only(right: 8),
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.5),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
-                                Icons.send,
-                                color: Colors.red,
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.favorite_border,
+                                Icons.bookmark_border,
                                 color: Colors.red,
                               ),
                             ),
@@ -151,7 +258,7 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                             ),
                             child: Text(
                               gameDetails?['esrb_rating']?['name'] ??
-                                  '13+', // Menampilkan ESRB Rating atau N/A jika null
+                                  'Not Rated', // Menampilkan ESRB Rating atau N/A jika null
                               style: TextStyle(
                                 color: Colors.white, // Warna teks
                                 fontSize: 14, // Ukuran teks
@@ -160,11 +267,31 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                             ),
                           ),
                           SizedBox(height: 8),
-                          Text(
-                            gameDetails?['name'] ?? 'Unknown',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
+                          FutureBuilder<List<Widget>>(
+                            future: _buildPlatformIcons(
+                                gameDetails?['parent_platforms']),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return CircularProgressIndicator();
+                              } else if (snapshot.hasData) {
+                                return Row(children: snapshot.data!);
+                              } else {
+                                return SizedBox();
+                              }
+                            },
+                          ),
+                          SizedBox(height: 4),
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.7,
+                            child: Text(
+                              gameDetails?['name'] ?? 'Unknown Game Name',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           SizedBox(height: 4),
@@ -200,35 +327,40 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                   ),
                   SizedBox(height: 16),
                   // Genres and ESRB Rating
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      for (var genre in gameDetails?['genres'] ?? [])
-                        Column(
-                          children: [
-                            Container(
-                              width: 60,
-                              height: 60,
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                Icons.sports_esports,
-                                color: Colors.white,
-                                size: 30,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              genre['name'] ?? '',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ],
-                        ),
-                    ],
+                  FutureBuilder<List<Widget>>(
+                    future: _buildCategoryIcons(gameDetails?['genres']),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (snapshot.hasData) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: snapshot.data!,
+                        );
+                      } else {
+                        return SizedBox();
+                      }
+                    },
                   ),
+
                   SizedBox(height: 24),
+                  Text(
+                    'Description:',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    gameDetails?['description_raw'] ??
+                        'No description available.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.5,
+                    ),
+                  ),
+                  SizedBox(height: 16),
                   Text(
                     'Spec Requirements:',
                     style: TextStyle(
@@ -258,23 +390,6 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                   ),
                   SizedBox(height: 24),
                   Text(
-                    'Description:',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    gameDetails?['description_raw'] ??
-                        'No description available.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      height: 1.5,
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
                     'Website:',
                     style: TextStyle(
                       fontSize: 18,
@@ -286,9 +401,103 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                     gameDetails?['website'] ?? 'N/A',
                     style: TextStyle(
                       fontSize: 14,
+                      color: Colors.blue,
                       decoration: TextDecoration.underline,
                     ),
                   ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Download/Purchase Links:',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  if (storeLinks!.isEmpty)
+                    Center(
+                      child: Text(
+                        'No store links available.',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (var link in storeLinks!)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  _launchURL(link['url']);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12.0,
+                                    vertical: 8.0,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black12,
+                                        blurRadius: 4.0,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      // Icon from assets/icons/{store_id}.png
+                                      FutureBuilder<bool>(
+                                        future: doesAssetExist(
+                                            'assets/icons/${link['store_id']}.png'),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            return CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            );
+                                          } else if (snapshot.hasData &&
+                                              snapshot.data!) {
+                                            return Image.asset(
+                                              'assets/icons/${link['store_id']}.png',
+                                              width: 24,
+                                              height: 24,
+                                            );
+                                          } else {
+                                            return Icon(
+                                              Icons.store,
+                                              size: 24,
+                                              color: Colors.grey,
+                                            );
+                                          }
+                                        },
+                                      ),
+                                      SizedBox(width: 12),
+                                      // Store Name
+                                      Expanded(
+                                        child: Text(
+                                          storeNames[link['store_id']] ??
+                                              'Unknown Store',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          SizedBox(height: 24),
+                        ],
+                      ),
+                    )
                 ],
               ),
             ),
