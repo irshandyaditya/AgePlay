@@ -37,59 +37,74 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
   @override
   void initState() {
     super.initState();
-    fetchGameDetails();
-    checkBookmarkStatus();
-    _loadProfileData();
+    _initializeData();
   }
+
+  Future<void> _initializeData() async {
+  await _loadProfileData(); // Tunggu hingga data profil selesai dimuat
+  fetchGameDetails();
+  checkBookmarkStatus(); // Panggil setelah _id berhasil diperbarui
+}
 
   Future<void> _loadProfileData() async {
     final id = await storage.read(key: 'id');
 
     setState(() {
-      _id = id ?? 'Unknown';
+      _id = id ?? '0';
     });
   }
 
-  Future<void> checkBookmarkStatus() async {
-    try {
-      final response = await http.post(
-        Uri.parse("https://polinemaesports.my.id/api/bookmark/check/"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "id_game": widget.slug,
-          "akun_id": _id
-        }), // Ubah akun_id sesuai kebutuhan
-      );
+Future<void> checkBookmarkStatus() async {
+  try {
+    final url = "https://polinemaesports.my.id/api/bookmark/check/";
+    final request = http.MultipartRequest('POST', Uri.parse(url));
+    request.fields['id_game'] = widget.slug;
+    request.fields['akun_id'] = _id ?? '0';
 
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+    // Log data yang dikirim
+    print("Sending request to $url with fields: ${request.fields}");
+
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(responseBody);
+      if (responseData['success'] == true) {
         setState(() {
-          isBookmarked = responseData['isBookmarked'] ?? false;
+          isBookmarked = responseData['isBookmarked'];
         });
       } else {
-        print("Failed to check bookmark status.");
+        print("Failed to check bookmark status: ${responseData['message']}");
       }
-    } catch (e) {
-      print("Error checking bookmark: $e");
+    } else {
+      print("HTTP error: ${response.statusCode}");
     }
+  } catch (e) {
+    print("Error checking bookmark status: $e");
   }
+}
+
 
   Future<void> toggleBookmark() async {
     try {
       final url = isBookmarked
           ? "https://polinemaesports.my.id/api/bookmark/delete/"
           : "https://polinemaesports.my.id/api/bookmark/save/";
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "id_game": widget.slug,
-          "akun_id": _id // Ubah akun_id sesuai kebutuhan
-        }),
-      );
+
+      final request = http.MultipartRequest('POST', Uri.parse(url));
+      request.fields['id_game'] = widget.slug;
+      request.fields['akun_id'] = _id ?? '';
+
+      print("Request to $url with fields: ${request.fields}");
+
+      final response = await request.send();
+
+      final responseBody = await response.stream.bytesToString();
+      print("Response status: ${response.statusCode}");
+      print("Response body: $responseBody");
 
       if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
+        final responseData = json.decode(responseBody);
         setState(() {
           isBookmarked = !isBookmarked;
         });
@@ -99,7 +114,8 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
           SnackBar(content: Text(message)),
         );
       } else {
-        print("Failed to toggle bookmark.");
+        print(
+            "Failed to toggle bookmark. Status: ${response.statusCode}, Body: $responseBody");
       }
     } catch (e) {
       print("Error toggling bookmark: $e");
