@@ -14,150 +14,161 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       backgroundColor: Colors.grey[200],
+      appBar: AppBar(
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.grey[200], // Warna latar belakang AppBar
+        title: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color.fromARGB(255, 239, 239, 239), width: 0.75), // Border putih
+              ),
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/foto_profil.png', // Ganti dengan path gambar profil Anda
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            SizedBox(width: 8,),
+            Expanded(
+              child: Text(
+                'Welcome, User', // Ubah sesuai kebutuhan
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.search, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SearchPage()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Stack(
-                children: [
-                  Container(
-                    height: screenHeight * 0.5,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        'assets/tekken.png',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
+              Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Gambar Game
+                    Container(
+                      height: screenHeight * 0.3,
+                      width: screenWidth,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE6EAEE),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.search,
-                                color: const Color(0xFF808080)),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => SearchPage()),
-                              );
-                            },
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: "Search",
-                                border: InputBorder.none,
-                              ),
-                            ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
                           ),
                         ],
                       ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16)
+                        ),
+                        child: Image.asset(
+                          'assets/tekken.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    top: 75,
-                    left: 0,
-                    right: 0,
-                    child: Padding(
+                    // Informasi Game
+                    Container(
+                       // Beri jarak setelah gambar
                       padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(16),
+                          bottomRight: Radius.circular(16)
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            blurRadius: 8,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'TEKKEN 8',
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFFEDEDED),
-                            ),
-                          ),
                           Row(
                             children: [
-                              InfoBadge(
-                                icon: Icon(Icons.sports_esports,
-                                    color: Colors.white, size: 16),
-                                text: 'Arcade',
+                              // Judul Game
+                              Expanded(
+                                child: Text(
+                                  "Tekken 5",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                              SizedBox(width: 16),
-                              InfoBadge(
-                                icon: Icon(Icons.fire_extinguisher_outlined,
-                                    color: Colors.white),
-                                text: '16+',
+                              // Rating
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.star,
+                                    color: Colors.orange,
+                                    size: 15,
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    "5",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.orange,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                          SizedBox(width: 16),
-                          InfoBadge(
-                            icon: Icon(Icons.star, color: Colors.white),
-                            text: '4.5',
+                          SizedBox(height: 5), // Jarak antar baris
+                          Text(
+                            "Platforms: PS",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            "Genres: Action",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          Text(
+                            "ESRB: 10",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey,
+                            ),
                           ),
                         ],
-                      ),
+                      )
                     ),
-                  ),
-                  Positioned(
-                    bottom: 50,
-                    left: 16,
-                    child: publisherInfo(),
-                  ),
-                ],
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Category",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    Icon(Icons.more_horiz),
-                  ],
-                ),
-              ),
-              Container(
-                height: 80,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    _buildCategoryIcon(
-                        'assets/categories/arcade.png', context),
-                    SizedBox(width: 16),
-                    _buildCategoryIcon(
-                        'assets/categories/sports.png', context),
-                    SizedBox(width: 16),
-                    _buildCategoryIcon(
-                        'assets/categories/adventure.png', context),
-                    SizedBox(width: 16),
-                    _buildCategoryIcon('assets/categories/shooter.png', context),
-                    SizedBox(width: 16),
-                    _buildCategoryIcon('assets/categories/role-playing-games-rpg.png', context),
-                    SizedBox(width: 16),
-                    _buildCategoryIcon('assets/categories/card.png', context),
                   ],
                 ),
               ),
@@ -168,7 +179,87 @@ class _HomePageState extends State<HomePage> {
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
               Container(
-                height: 220,
+                height: screenHeight * 0.32,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    PopularItem(
+                      imageUrl: 'assets/p5s.png',
+                      title: 'Final Fantasy 7 Remake Intergrade',
+                      subtitle: 'Arcade',
+                      publisherLogoUrl: 'assets/bc.png',
+                      publisherName: 'Square Enix',
+                      postedTime: 'Posted 35 min ago',
+                      rating: 4.3,
+                    ),
+                    PopularItem(
+                      imageUrl: 'assets/p5s.png',
+                      title: 'Final Fantasy 7 Remake Intergrade',
+                      subtitle: 'Arcade',
+                      publisherLogoUrl: 'assets/bc.png',
+                      publisherName: 'Square Enix',
+                      postedTime: 'Posted 35 min ago',
+                      rating: 4.3,
+                    ),
+                    PopularItem(
+                      imageUrl: 'assets/p5s.png',
+                      title: 'Final Fantasy 7 Remake Intergrade',
+                      subtitle: 'Arcade',
+                      publisherLogoUrl: 'assets/bc.png',
+                      publisherName: 'Square Enix',
+                      postedTime: 'Posted 35 min ago',
+                      rating: 4.3,
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
+                child: Text("For You", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              Container(
+                height: screenHeight * 0.32,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    PopularItem(
+                      imageUrl: 'assets/p5s.png',
+                      title: 'Final Fantasy 7 Remake Intergrade',
+                      subtitle: 'Arcade',
+                      publisherLogoUrl: 'assets/bc.png',
+                      publisherName: 'Square Enix',
+                      postedTime: 'Posted 35 min ago',
+                      rating: 4.3,
+                    ),
+                    PopularItem(
+                      imageUrl: 'assets/p5s.png',
+                      title: 'Final Fantasy 7 Remake Intergrade',
+                      subtitle: 'Arcade',
+                      publisherLogoUrl: 'assets/bc.png',
+                      publisherName: 'Square Enix',
+                      postedTime: 'Posted 35 min ago',
+                      rating: 4.3,
+                    ),
+                    PopularItem(
+                      imageUrl: 'assets/p5s.png',
+                      title: 'Final Fantasy 7 Remake Intergrade',
+                      subtitle: 'Arcade',
+                      publisherLogoUrl: 'assets/bc.png',
+                      publisherName: 'Square Enix',
+                      postedTime: 'Posted 35 min ago',
+                      rating: 4.3,
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
+                child: Text("For You",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              Container(
+                height: screenHeight * 0.32,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
@@ -299,8 +390,8 @@ class PopularItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
                   imageUrl,
-                  height: 120,
-                  width: 160,
+                  height: MediaQuery.of(context).size.height * 0.12,
+                  width: MediaQuery.of(context).size.width * 0.4,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -344,14 +435,14 @@ class PopularItem extends StatelessWidget {
                   .ellipsis, // Tambahkan "..." jika teks terlalu panjang
             ),
           ),
-          SizedBox(height: 4),
+          SizedBox(height: 2),
           Text(
             subtitle,
             style: TextStyle(fontSize: 12, color: Colors.grey),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 4),
+          SizedBox(height: 2),
           Row(
             children: [
               CircleAvatar(
@@ -369,7 +460,7 @@ class PopularItem extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 4),
+          SizedBox(height: 2),
           Flexible(
             child: Text(
               postedTime,
