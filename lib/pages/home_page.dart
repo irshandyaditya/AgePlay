@@ -145,19 +145,19 @@ class _HomePageState extends State<HomePage> {
                   scrollDirection: Axis.horizontal,
                   children: [
                     _buildCategoryIcon(
-                        'assets/categories/Apple Arcade.png', context),
+                        'assets/categories/arcade.png', context),
                     SizedBox(width: 16),
                     _buildCategoryIcon(
-                        'assets/categories/Soccer Ball.png', context),
+                        'assets/categories/sports.png', context),
                     SizedBox(width: 16),
                     _buildCategoryIcon(
-                        'assets/categories/Adventure.png', context),
+                        'assets/categories/adventure.png', context),
                     SizedBox(width: 16),
-                    _buildCategoryIcon('assets/categories/Gun.png', context),
+                    _buildCategoryIcon('assets/categories/shooter.png', context),
                     SizedBox(width: 16),
-                    _buildCategoryIcon('assets/categories/Weapon.png', context),
+                    _buildCategoryIcon('assets/categories/role-playing-games-rpg.png', context),
                     SizedBox(width: 16),
-                    _buildCategoryIcon('assets/categories/Cards.png', context),
+                    _buildCategoryIcon('assets/categories/card.png', context),
                   ],
                 ),
               ),
@@ -232,7 +232,8 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => GameDetailsPage(slug: 'tekken-8')),
+          MaterialPageRoute(
+              builder: (context) => GameDetailsPage(slug: 'tekken-8')),
         );
       },
       child: Padding(
