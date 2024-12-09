@@ -5,11 +5,8 @@ import 'package:flutter/services.dart';
 import 'pages/splash_screen.dart';
 import 'package:age_play/pages/sign_up.dart';
 import 'package:age_play/pages/home_page.dart';
-import 'package:age_play/pages/profile.dart';
 import 'package:age_play/pages/camera.dart';
 import 'package:age_play/pages/about.dart';
-import 'package:age_play/pages/search.dart';
-import 'package:age_play/pages/bookmark.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,11 +32,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/signup': (context) => const SignUpPage(),
         '/home': (context) => HomePage(),
-        '/profile': (context) => Profile(),
         '/camera': (context) => Camera(),
         '/about': (context) => AboutPage(),
-        '/search': (context) => SearchPage(),
-        '/bookmark': (context) => BookmarkPage(),
         '/login': (context) => LoginPage(),
         '/filter': (context) => FilterPage()
       },

@@ -1,3 +1,7 @@
+import 'package:age_play/pages/bookmark.dart';
+import 'package:age_play/pages/home_page.dart';
+import 'package:age_play/pages/profile.dart';
+import 'package:age_play/pages/search.dart';
 import 'package:flutter/material.dart';
 
 class BottomNavBarWidget extends StatelessWidget {
@@ -34,7 +38,13 @@ class BottomNavBarWidget extends StatelessWidget {
                 color: currentIndex == 0 ? Colors.red : Colors.black,
               ),
               onPressed: () {
-                Navigator.pushNamed(context, '/home');
+                Navigator.of(context).pushReplacement(
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => HomePage(),
+                    transitionDuration: Duration.zero, // Durasi transisi 0
+                    reverseTransitionDuration: Duration.zero, // Durasi transisi balik 0
+                  ),
+                );
                 onTap(0);
               },
             ),
@@ -44,7 +54,13 @@ class BottomNavBarWidget extends StatelessWidget {
                 color: currentIndex == 1 ? Colors.red : Colors.black,
               ),
               onPressed: () {
-                Navigator.pushNamed(context, '/search');
+                Navigator.of(context).pushReplacement(
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => SearchPage(),
+                    transitionDuration: Duration.zero, // Durasi transisi 0
+                    reverseTransitionDuration: Duration.zero, // Durasi transisi balik 0
+                  ),
+                );
                 onTap(1);
               },
             ),
@@ -55,7 +71,13 @@ class BottomNavBarWidget extends StatelessWidget {
                 color: currentIndex == 2 ? Colors.red : Colors.black,
               ),
               onPressed: () {
-                Navigator.pushNamed(context, '/bookmark');
+                Navigator.of(context).pushReplacement(
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => BookmarkPage(),
+                    transitionDuration: Duration.zero, // Durasi transisi 0
+                    reverseTransitionDuration: Duration.zero, // Durasi transisi balik 0
+                  ),
+                );
                 onTap(2);
               },
             ),
@@ -65,7 +87,13 @@ class BottomNavBarWidget extends StatelessWidget {
                 color: currentIndex == 3 ? Colors.red : Colors.black,
               ),
               onPressed: () {
-                Navigator.pushNamed(context, '/profile');
+                Navigator.of(context).pushReplacement(
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => Profile(),
+                    transitionDuration: Duration.zero, // Durasi transisi 0
+                    reverseTransitionDuration: Duration.zero, // Durasi transisi balik 0
+                  ),
+                );
                 onTap(3);
               },
             ),

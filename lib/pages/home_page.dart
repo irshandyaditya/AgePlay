@@ -48,9 +48,12 @@ class _HomePageState extends State<HomePage> {
             IconButton(
               icon: Icon(Icons.search, color: Colors.white),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SearchPage()),
+                Navigator.of(context).pushReplacement(
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => SearchPage(),
+                    transitionDuration: Duration.zero, // Durasi transisi 0
+                    reverseTransitionDuration: Duration.zero, // Durasi transisi balik 0
+                  ),
                 );
               },
             ),
