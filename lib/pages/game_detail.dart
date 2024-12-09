@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class GameDetailsPage extends StatefulWidget {
   final String slug;
@@ -14,6 +15,7 @@ class GameDetailsPage extends StatefulWidget {
 }
 
 class _GameDetailsPageState extends State<GameDetailsPage> {
+  final storage = const FlutterSecureStorage();
   Map<String, dynamic>? gameDetails;
   List<dynamic>? storeLinks;
   final Map<int, String> storeNames = {
@@ -29,10 +31,79 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
     11: 'Epic Games',
   };
 
+  bool isBookmarked = false;
+  String? _id;
+
   @override
   void initState() {
     super.initState();
     fetchGameDetails();
+    checkBookmarkStatus();
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    final id = await storage.read(key: 'id');
+
+    setState(() {
+      _id = id ?? 'Unknown';
+    });
+  }
+
+  Future<void> checkBookmarkStatus() async {
+    try {
+      final response = await http.post(
+        Uri.parse("https://polinemaesports.my.id/api/bookmark/check/"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "id_game": widget.slug,
+          "akun_id": _id
+        }), // Ubah akun_id sesuai kebutuhan
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        setState(() {
+          isBookmarked = responseData['isBookmarked'] ?? false;
+        });
+      } else {
+        print("Failed to check bookmark status.");
+      }
+    } catch (e) {
+      print("Error checking bookmark: $e");
+    }
+  }
+
+  Future<void> toggleBookmark() async {
+    try {
+      final url = isBookmarked
+          ? "https://polinemaesports.my.id/api/bookmark/delete/"
+          : "https://polinemaesports.my.id/api/bookmark/save/";
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "id_game": widget.slug,
+          "akun_id": _id // Ubah akun_id sesuai kebutuhan
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        setState(() {
+          isBookmarked = !isBookmarked;
+        });
+
+        final message = responseData['message'] ?? "Success";
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      } else {
+        print("Failed to toggle bookmark.");
+      }
+    } catch (e) {
+      print("Error toggling bookmark: $e");
+    }
   }
 
   Future<void> fetchGameDetails() async {
@@ -214,17 +285,27 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                       Row(
                         children: [
                           GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.bookmark_border,
-                                color: Colors.red,
+                            onTap: toggleBookmark,
+                            child: AnimatedSwitcher(
+                              duration: Duration(milliseconds: 300),
+                              transitionBuilder: (child, animation) {
+                                return ScaleTransition(
+                                    scale: animation, child: child);
+                              },
+                              child: Container(
+                                key: ValueKey<bool>(isBookmarked),
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.5),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  isBookmarked
+                                      ? Icons.bookmark
+                                      : Icons.bookmark_border,
+                                  color: Colors.red,
+                                ),
                               ),
                             ),
                           ),

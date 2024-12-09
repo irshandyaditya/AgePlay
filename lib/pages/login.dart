@@ -56,6 +56,7 @@ class _LoginPageState extends State<LoginPage> {
         await storage.write(key: 'auth_token', value: responseData['token']);
         await storage.write(key: 'csrf_token', value: csrfToken);
         await storage.write(key: 'session_id', value: sessionId);
+        await storage.write(key: 'id', value: responseData['user']['id'].toString());
         await storage.write(key: 'name', value: responseData['user']['name']);
         await storage.write(key: 'email', value: responseData['user']['email']);
         await storage.write(key: 'foto_profil', value: responseData['user']['foto_profil']);
