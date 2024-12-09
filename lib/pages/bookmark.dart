@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 import 'package:age_play/widgets/bottom_navbar.dart';
+import 'package:age_play/pages/game_detail.dart';
 
 class BookmarkPage extends StatefulWidget {
   @override
@@ -7,50 +11,85 @@ class BookmarkPage extends StatefulWidget {
 }
 
 class _BookmarkPageState extends State<BookmarkPage> {
+  final FlutterSecureStorage storage = FlutterSecureStorage();
   int _currentIndex = 2;
+  bool _isLoading = true;
+  List<dynamic> bookmarks = [];
+  List<Map<String, dynamic>> gameDetails = [];
 
-  final List<Map<String, String>> bookmarkedItems = [
-    {
-      "title": "Persona 3 Reload",
-      "price": "Rp 779.000",
-      "developer": "ATLUS",
-      "tags": "JRPG, RPG, Anime, Adventure",
-      "image": "assets/persona3.jpg",
-    },
-    {
-      "title": "Red Dead Redemption II",
-      "price": "Rp 879.000",
-      "developer": "Rockstar Games",
-      "tags": "Action, Open World, Western",
-      "image": "assets/red_dead.jpg",
-    },
-    {
-      "title": "FIFA 25",
-      "price": "Rp 679.000",
-      "developer": "EA Sports",
-      "tags": "Sports, Soccer, Multiplayer",
-      "image": "assets/fifa25.jpg",
-    },
-    {
-      "title": "Horizon Forbidden West",
-      "price": "Rp 829.000",
-      "developer": "Guerrilla Games",
-      "tags": "Adventure, RPG, Open World",
-      "image": "assets/horizon.jpg",
-    },
-    {
-      "title": "Street Fighter 6",
-      "price": "Rp 739.000",
-      "developer": "Capcom",
-      "tags": "Fighting, Multiplayer",
-      "image": "assets/street_fighter.jpg",
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchBookmarks();
+  }
+
+  Future<void> _fetchBookmarks() async {
+    final id = await storage.read(key: 'id');
+    if (id == null) {
+      print("Error: No ID found in storage");
+      return;
+    }
+
+    final url = 'https://polinemaesports.my.id/api/bookmark/list/$id';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          bookmarks = data['bookmarks'];
+          await _fetchGameDetails();
+        } else {
+          print("Failed to fetch bookmarks: ${data['message']}");
+        }
+      } else {
+        print("Failed to fetch data. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _fetchGameDetails() async {
+    List<Map<String, dynamic>> details = [];
+    for (var bookmark in bookmarks) {
+      final gameId = bookmark['id_game'];
+      final url =
+          'https://polinemaesports.my.id/api/game-details/${Uri.encodeComponent(gameId)}';
+      try {
+        final response = await http.get(Uri.parse(url));
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          details.add({
+            'slug': data['slug'] ?? gameId,
+            'name': data['name'] ?? "Unknown Game",
+            'image': data['background_image'] ?? 'https://via.placeholder.com/150',
+            'platforms': data['platforms']
+                    ?.map((p) => p['platform']['name'])
+                    ?.toList()
+                    ?.join(', ') ??
+                'Unknown',
+            'rating': data['rating'] ?? 'N/A',
+          });
+        } else {
+          print("Failed to fetch details for game ID: $gameId");
+        }
+      } catch (e) {
+        print("Error fetching details for game ID $gameId: $e");
+      }
+    }
+    setState(() {
+      gameDetails = details;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Body background set to white
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -59,85 +98,84 @@ class _BookmarkPageState extends State<BookmarkPage> {
           style: TextStyle(color: Colors.black),
         ),
         automaticallyImplyLeading: false,
-        // leading: IconButton(
-        //   icon: Icon(Icons.arrow_back_ios, color: Colors.black),
-        //   onPressed: () {
-        //     Navigator.pop(context);
-        //   },
-        // ),
       ),
-      body: ListView.builder(
-        itemCount: bookmarkedItems.length,
-        itemBuilder: (context, index) {
-          final item = bookmarkedItems[index];
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            child: Row(
-              children: [
-                // Game image
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.3,
-                  height: MediaQuery.of(context).size.height * 0.09,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    image: DecorationImage(
-                      image: AssetImage(item["image"]!), // Gambar
-                      fit: BoxFit.cover,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.5), // Warna shadow
-                        blurRadius: 8, // Tingkat blur
-                        offset: Offset(0, 4), // Posisi shadow
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : gameDetails.isEmpty
+              ? Center(child: Text("No bookmarks found."))
+              : ListView.builder(
+                  itemCount: gameDetails.length,
+                  itemBuilder: (context, index) {
+                    final item = gameDetails[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GameDetailsPage(slug: item['slug']),
+                            ),
+                          );
+                        },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
+                        child: Row(
+                          children: [
+                            // Game image
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              height: MediaQuery.of(context).size.height * 0.09,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                image: DecorationImage(
+                                  image: NetworkImage(item['image']),
+                                  fit: BoxFit.cover,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.5),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            // Game info
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item["name"],
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Platforms: ${item["platforms"]}",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Rating: ${item["rating"]}",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-                SizedBox(width: 16),
-                // Game info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item["title"]!,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        item["price"]!, // Harga
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.green,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        item["developer"]!, // Developer di atas genre
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      Text(
-                        item["tags"]!, // Genre game
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/camera');
