@@ -63,115 +63,347 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                height: screenHeight * 0.48, // Tentukan tinggi untuk carousel
+                child: PageView(
+                  controller: PageController(viewportFraction: 0.98), // Atur viewport untuk membuat efek seperti carousel
                   children: [
-                    // Gambar Game
+                    // Konten 1
                     Container(
-                      height: screenHeight * 0.3,
-                      width: screenWidth,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16)
-                        ),
-                        child: Image.asset(
-                          'assets/tekken.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    // Informasi Game
-                    Container(
-                       // Beri jarak setelah gambar
-                      padding: const EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(16),
-                          bottomRight: Radius.circular(16)
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.3),
-                            blurRadius: 8,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              // Judul Game
-                              Expanded(
-                                child: Text(
-                                  "Tekken 5",
+                          // Gambar Game
+                          Container(
+                            height: screenHeight * 0.3,
+                            width: screenWidth,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 5,
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(16),
+                                topRight: Radius.circular(16),
+                              ),
+                              child: Image.asset(
+                                'assets/tekken.png', // Gambar pertama
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          // Informasi Game
+                          Container(
+                            padding: const EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(16),
+                                bottomRight: Radius.circular(16),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    // Judul Game
+                                    Expanded(
+                                      child: Text(
+                                        "Tekken 5",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    // Rating
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.star,
+                                          color: Colors.orange,
+                                          size: 15,
+                                        ),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          "5",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.orange,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 5), // Jarak antar baris
+                                Text(
+                                  "Platforms: PS",
                                   style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: Colors.black87,
                                   ),
                                 ),
-                              ),
-                              // Rating
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.star,
-                                    color: Colors.orange,
-                                    size: 15,
+                                Text(
+                                  "Genres: Action",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
                                   ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    "5",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.orange,
-                                    ),
+                                ),
+                                Text(
+                                  "ESRB: 10",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 5), // Jarak antar baris
-                          Text(
-                            "Platforms: PS",
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          Text(
-                            "Genres: Action",
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          Text(
-                            "ESRB: 10",
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey,
+                                ),
+                              ],
                             ),
                           ),
                         ],
-                      )
+                      ),
+                    ),
+                    // Konten 2
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Gambar Game
+                          Container(
+                            height: screenHeight * 0.3,
+                            width: screenWidth,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 5,
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(16),
+                                topRight: Radius.circular(16),
+                              ),
+                              child: Image.asset(
+                                'assets/tekken.png', // Gambar kedua
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          // Informasi Game
+                          Container(
+                            padding: const EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(16),
+                                bottomRight: Radius.circular(16),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    // Judul Game
+                                    Expanded(
+                                      child: Text(
+                                        "Tekken 5",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    // Rating
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.star,
+                                          color: Colors.orange,
+                                          size: 15,
+                                        ),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          "5",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.orange,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 5), // Jarak antar baris
+                                Text(
+                                  "Platforms: PS",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                Text(
+                                  "Genres: Action",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                Text(
+                                  "ESRB: 10",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Konten 3
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Gambar Game
+                          Container(
+                            height: screenHeight * 0.3,
+                            width: screenWidth,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 5,
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(16),
+                                topRight: Radius.circular(16),
+                              ),
+                              child: Image.asset(
+                                'assets/tekken.png', // Gambar ketiga
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          // Informasi Game
+                          Container(
+                            padding: const EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(16),
+                                bottomRight: Radius.circular(16),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    // Judul Game
+                                    Expanded(
+                                      child: Text(
+                                        "Tekken 5",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    // Rating
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.star,
+                                          color: Colors.orange,
+                                          size: 15,
+                                        ),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          "5",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.orange,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 5), // Jarak antar baris
+                                Text(
+                                  "Platforms: PS",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                Text(
+                                  "Genres: Action",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                Text(
+                                  "ESRB: 10",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
+
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text("For You",
