@@ -66,13 +66,18 @@ class _BookmarkPageState extends State<BookmarkPage> {
           details.add({
             'slug': data['slug'] ?? gameId,
             'name': data['name'] ?? "Unknown Game",
-            'image': data['background_image'] ?? 'https://via.placeholder.com/150',
+            'image':
+                data['background_image'] ?? 'https://via.placeholder.com/150',
             'platforms': data['platforms']
                     ?.map((p) => p['platform']['name'])
                     ?.toList()
                     ?.join(', ') ??
                 'Unknown',
             'rating': data['rating'] ?? 'N/A',
+            'genres':
+                data['genres']?.map((g) => g['name'])?.toList()?.join(', ') ??
+                    'N/A',
+            'esrb_rating': data['esrb_rating']?['name'] ?? 'N/A',
           });
         } else {
           print("Failed to fetch details for game ID: $gameId");
@@ -110,12 +115,13 @@ class _BookmarkPageState extends State<BookmarkPage> {
                     return GestureDetector(
                       onTap: () {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GameDetailsPage(slug: item['slug']),
-                            ),
-                          );
-                        },
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                GameDetailsPage(slug: item['slug']),
+                          ),
+                        );
+                      },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 8.0, horizontal: 16.0),
@@ -165,6 +171,20 @@ class _BookmarkPageState extends State<BookmarkPage> {
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.green,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Genres: ${item["genres"]}",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  Text(
+                                    "ESRB: ${item["esrb_rating"]}",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey,
                                     ),
                                   ),
                                 ],
