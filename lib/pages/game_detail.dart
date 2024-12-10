@@ -111,7 +111,7 @@ Future<void> checkBookmarkStatus() async {
 
         final message = responseData['message'] ?? "Success";
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
+          SnackBar(content: Text(message), backgroundColor: Colors.green,),
         );
       } else {
         print(

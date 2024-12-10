@@ -4,6 +4,8 @@ import 'package:age_play/widgets/bottom_navbar.dart';
 import 'package:http/http.dart' as http;
 import 'package:age_play/pages/search.dart';
 import 'package:age_play/pages/game_detail.dart';
+import 'package:age_play/pages/profile.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -11,33 +13,59 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final storage = const FlutterSecureStorage();
   int _currentIndex = 0;
 
-  Future<List<Map<String, dynamic>>> fetchMainGames() async {
-  final response = await http.get(Uri.parse('https://polinemaesports.my.id/api/game-lists/'));
-  if (response.statusCode == 200) {
-    final Map<String, dynamic> jsonResponse = json.decode(response.body);
-    final List<dynamic> gameList = jsonResponse['results']; // Ambil daftar dari properti 'data'
-    return gameList.map((game) {
-      return {
-        'slug': game['slug'] ?? 'Unknown Slug',
-        'name': game['name'] ?? 'Unknown Game',
-        'image': game['background_image'] ?? 'https://via.placeholder.com/150',
-        'platforms': game['platforms']
-                ?.map((p) => p['platform']['name'])
-                ?.toList()
-                ?.join(', ') ??
-            'Unknown',
-        'rating': game['rating']?.toString() ?? 'N/A',
-        'genres': game['genres']?.map((g) => g['name'])?.toList()?.join(', ') ?? 'N/A',
-        'esrb_rating': game['esrb_rating']?['name'] ?? 'N/A',
-      };
-    }).toList();
-  } else {
-    throw Exception('Failed to load games');
-  }
-}
+  String? _name; // Nama user
+  String? _profilePicture; // URL foto profil user
 
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    // Ambil data akun dari secure storage
+    final name = await storage.read(key: 'name'); // Nama user
+    final profilePicture =
+        await storage.read(key: 'foto_profil'); // Foto profil user
+
+    setState(() {
+      _name = name ?? 'Unknown';
+      _profilePicture = profilePicture;
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> fetchMainGames() async {
+    final response = await http
+        .get(Uri.parse('https://polinemaesports.my.id/api/game-lists/'));
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = json.decode(response.body);
+      final List<dynamic> gameList =
+          jsonResponse['results']; // Ambil daftar dari properti 'data'
+      return gameList.map((game) {
+        return {
+          'slug': game['slug'] ?? 'Unknown Slug',
+          'name': game['name'] ?? 'Unknown Game',
+          'image':
+              game['background_image'] ?? 'https://via.placeholder.com/150',
+          'platforms': game['platforms']
+                  ?.map((p) => p['platform']['name'])
+                  ?.toList()
+                  ?.join(', ') ??
+              'Unknown',
+          'rating': game['rating']?.toString() ?? 'N/A',
+          'genres':
+              game['genres']?.map((g) => g['name'])?.toList()?.join(', ') ??
+                  'N/A',
+          'esrb_rating': game['esrb_rating']?['name'] ?? 'N/A',
+        };
+      }).toList();
+    } else {
+      throw Exception('Failed to load games');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,28 +80,29 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.white, // Warna latar belakang AppBar
         title: Row(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: const Color.fromARGB(255, 239, 239, 239),
-                    width: 0.75), // Border putih
-              ),
-              child: ClipOval(
-                child: Image.asset(
-                  'assets/foto_profil.png', // Ganti dengan path gambar profil Anda
-                  fit: BoxFit.cover,
-                ),
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Profile()), // Halaman profil Anda
+                );
+              },
+              child: CircleAvatar(
+                radius: 20,
+                backgroundImage: _profilePicture != null
+                    ? NetworkImage(
+                        'https://polinemaesports.my.id/$_profilePicture')
+                    : const AssetImage('assets/foto_profil.png')
+                        as ImageProvider,
               ),
             ),
             SizedBox(
-              width: 8,
+              width: 12,
             ),
             Expanded(
               child: Text(
-                'Welcome, User', // Ubah sesuai kebutuhan
+                'Welcome, ${_name ?? 'Loading...'}', // Ubah sesuai kebutuhan
                 style: TextStyle(
                     fontSize: 16,
                     color: const Color.fromARGB(255, 111, 111, 111)),
@@ -240,7 +269,7 @@ class _HomePageState extends State<HomePage> {
                   SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
-                    child: Text("For You",
+                    child: Text("Popular Genres",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
@@ -281,7 +310,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
-                    child: Text("For You",
+                    child: Text("PC Games",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
@@ -322,7 +351,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
-                    child: Text("For You",
+                    child: Text("For Everyone",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                   ),

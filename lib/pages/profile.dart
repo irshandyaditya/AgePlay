@@ -104,9 +104,9 @@ class _ProfileState extends State<Profile> {
                   CircleAvatar(
                     radius: 35,
                     backgroundImage: _profilePicture != null
-                        ? NetworkImage('https://polinemaesports.my.id/$_profilePicture') // Jika ada foto profil
+                        ? NetworkImage('https://polinemaesports.my.id/$_profilePicture')
                         : const AssetImage('assets/foto_profil.png')
-                            as ImageProvider, // Default foto profil
+                            as ImageProvider,
                   ),
                 ],
               ),
