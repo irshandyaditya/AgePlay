@@ -26,11 +26,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   bool _isFrontCamera = false;
   //for flash
   bool _isFlashOn = false;
-  //for focus
-  Offset? _focusPoint;
-  //For Zoom
-  double _currentZoom = 1.0;
-  File? _capturedImage;
   bool isLoading = false; // Menambahkan variabel isLoading
   File? _image;
 
