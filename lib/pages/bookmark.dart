@@ -159,18 +159,28 @@ class _BookmarkPageState extends State<BookmarkPage> {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.star, 
+                                        color: Colors.orange, 
+                                        size: 15
+                                      ),
+                                      SizedBox(width: 5,),
+                                      Text(
+                                        "${item["rating"]}",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.orange,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                   Text(
                                     "Platforms: ${item["platforms"]}",
                                     style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  Text(
-                                    "Rating: ${item["rating"]}",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.green,
+                                      fontSize: 13,
+                                      color: Colors.black87,
                                     ),
                                   ),
                                   Text(
