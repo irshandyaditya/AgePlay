@@ -42,11 +42,11 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: Text(
                 'Welcome, User', // Ubah sesuai kebutuhan
-                style: TextStyle(fontSize: 16, color: Colors.white),
+                style: TextStyle(fontSize: 16, color: const Color.fromARGB(255, 111, 111, 111)),
               ),
             ),
             IconButton(
-              icon: Icon(Icons.search, color: Colors.white),
+              icon: Icon(Icons.search, color: const Color.fromARGB(255, 111, 111, 111)),
               onPressed: () {
                 Navigator.of(context).pushReplacement(
                   PageRouteBuilder(
@@ -65,8 +65,9 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              SizedBox(height: 16,),
               Container(
-                height: screenHeight * 0.48, // Tentukan tinggi untuk carousel
+                height: screenHeight * 0.45, // Tentukan tinggi untuk carousel
                 child: PageView(
                   controller: PageController(viewportFraction: 0.98), // Atur viewport untuk membuat efek seperti carousel
                   children: [
@@ -408,13 +409,13 @@ class _HomePageState extends State<HomePage> {
               ),
 
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
                 child: Text("For You",
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
               Container(
-                height: screenHeight * 0.32,
+                height: screenHeight * 0.29,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
@@ -453,7 +454,7 @@ class _HomePageState extends State<HomePage> {
                 child: Text("For You", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
               Container(
-                height: screenHeight * 0.32,
+                height: screenHeight * 0.29,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
@@ -494,7 +495,7 @@ class _HomePageState extends State<HomePage> {
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
               Container(
-                height: screenHeight * 0.32,
+                height: screenHeight * 0.29,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
