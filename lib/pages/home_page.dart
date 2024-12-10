@@ -45,11 +45,11 @@ class _HomePageState extends State<HomePage> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.grey[200], // Warna latar belakang AppBar
+        backgroundColor: Colors.white, // Warna latar belakang AppBar
         title: Row(
           children: [
             Container(

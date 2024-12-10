@@ -5,6 +5,7 @@ class AboutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: Text('About AgePlay'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -13,6 +14,7 @@ class AboutPage extends StatelessWidget {
           },
         ),
       ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: SingleChildScrollView(

@@ -163,6 +163,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     return SafeArea(
       child: Scaffold(
         extendBodyBehindAppBar: true,
+        backgroundColor: Colors.white,
         body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return Stack(

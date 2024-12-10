@@ -256,6 +256,7 @@ Future<void> checkBookmarkStatus() async {
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

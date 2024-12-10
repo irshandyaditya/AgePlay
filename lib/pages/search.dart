@@ -99,6 +99,7 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.white,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -162,6 +163,7 @@ class _SearchPageState extends State<SearchPage> {
               ],
             ),
           ),
+          SizedBox(height: 12,),
           if (_isFilterApplied && _filterData != null) ...[
             // Show applied filter info
             Padding(

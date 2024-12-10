@@ -19,6 +19,7 @@ class DisplayPictureScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         automaticallyImplyLeading: false,
       ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
@@ -114,7 +115,7 @@ class DisplayPictureScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 10),
                         GameRecommendation(
-                          imageName: 'assets/tekken-8.jpg',
+                          imageName: 'assets/tekken.png',
                           title: 'Tekken 8',
                           price: 'Rp 779.000',
                           publisher: 'Bandai Namco Entertainment',

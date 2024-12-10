@@ -160,6 +160,7 @@ class _EditProfileState extends State<EditProfile> {
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
