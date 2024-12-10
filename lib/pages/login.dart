@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
         }
       } else {
         setState(() {
-          _errorMessage = 'Failed to connect to server';
+          _errorMessage = 'Username or password is incorrect';
         });
       }
     } catch (e) {
