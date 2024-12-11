@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:age_play/widgets/bottom_navbar.dart';
 import 'package:http/http.dart' as http;
@@ -37,9 +38,18 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<List<Map<String, dynamic>>> fetchMainGames() async {
-    final response = await http
-        .get(Uri.parse('https://polinemaesports.my.id/api/game-lists/'));
+  Future<List<Map<String, dynamic>>> fetchMainGames(String? category) async {
+    final response;
+    if (category == 'Popular Genres') {
+      response = await http
+        .get(Uri.parse('http://polinemaesports.my.id/api/game-lists?genres=action'));
+    } else if (category == 'PC Games') {
+      response = await http
+        .get(Uri.parse('http://polinemaesports.my.id/api/game-lists?parent_platforms=1'));
+    } else {  
+      response = await http
+          .get(Uri.parse('https://polinemaesports.my.id/api/game-lists/'));
+    }
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
       final List<dynamic> gameList =
@@ -50,7 +60,7 @@ class _HomePageState extends State<HomePage> {
           'name': game['name'] ?? 'Unknown Game',
           'image':
               game['background_image'] ?? 'https://via.placeholder.com/150',
-          'platforms': game['platforms']
+          'platforms': game['parent_platforms']
                   ?.map((p) => p['platform']['name'])
                   ?.toList()
                   ?.join(', ') ??
@@ -127,26 +137,24 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       body: SafeArea(
-        child: FutureBuilder<List<Map<String, dynamic>>>(
-          future: fetchMainGames(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: Text('No games found'));
-            }
-
-            final games = snapshot.data!;
-            final topGames = games.take(5).toList(); // Ambil 5 game teratas
-
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 16),
-                  Container(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 16),
+              FutureBuilder<List<Map<String, dynamic>>>(
+                future: fetchMainGames('Main'),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No games found'));
+                  }
+                  final games = snapshot.data!;
+                  final topGames = games.take(5).toList(); // Ambil 5 game teratas
+                  return Container(
                     height: screenHeight * 0.45,
                     child: PageView.builder(
                       controller: PageController(viewportFraction: 0.98),
@@ -167,8 +175,8 @@ class _HomePageState extends State<HomePage> {
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 2,
-                                      blurRadius: 5,
+                                      spreadRadius: 0,
+                                      blurRadius: 0,
                                     ),
                                   ],
                                 ),
@@ -265,135 +273,139 @@ class _HomePageState extends State<HomePage> {
                         );
                       },
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
-                    child: Text("Popular Genres",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                  ),
-                  Container(
-                    height: screenHeight * 0.29,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        PopularItem(
-                          imageUrl: 'assets/p5s.png',
-                          title: 'Final Fantasy 7 Remake Intergrade',
-                          subtitle: 'Arcade',
-                          publisherLogoUrl: 'assets/bc.png',
-                          publisherName: 'Square Enix',
-                          postedTime: 'Posted 35 min ago',
-                          rating: 4.3,
-                        ),
-                        PopularItem(
-                          imageUrl: 'assets/p5s.png',
-                          title: 'Final Fantasy 7 Remake Intergrade',
-                          subtitle: 'Arcade',
-                          publisherLogoUrl: 'assets/bc.png',
-                          publisherName: 'Square Enix',
-                          postedTime: 'Posted 35 min ago',
-                          rating: 4.3,
-                        ),
-                        PopularItem(
-                          imageUrl: 'assets/p5s.png',
-                          title: 'Final Fantasy 7 Remake Intergrade',
-                          subtitle: 'Arcade',
-                          publisherLogoUrl: 'assets/bc.png',
-                          publisherName: 'Square Enix',
-                          postedTime: 'Posted 35 min ago',
-                          rating: 4.3,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
-                    child: Text("PC Games",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                  ),
-                  Container(
-                    height: screenHeight * 0.29,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        PopularItem(
-                          imageUrl: 'assets/p5s.png',
-                          title: 'Final Fantasy 7 Remake Intergrade',
-                          subtitle: 'Arcade',
-                          publisherLogoUrl: 'assets/bc.png',
-                          publisherName: 'Square Enix',
-                          postedTime: 'Posted 35 min ago',
-                          rating: 4.3,
-                        ),
-                        PopularItem(
-                          imageUrl: 'assets/p5s.png',
-                          title: 'Final Fantasy 7 Remake Intergrade',
-                          subtitle: 'Arcade',
-                          publisherLogoUrl: 'assets/bc.png',
-                          publisherName: 'Square Enix',
-                          postedTime: 'Posted 35 min ago',
-                          rating: 4.3,
-                        ),
-                        PopularItem(
-                          imageUrl: 'assets/p5s.png',
-                          title: 'Final Fantasy 7 Remake Intergrade',
-                          subtitle: 'Arcade',
-                          publisherLogoUrl: 'assets/bc.png',
-                          publisherName: 'Square Enix',
-                          postedTime: 'Posted 35 min ago',
-                          rating: 4.3,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
-                    child: Text("For Everyone",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                  ),
-                  Container(
-                    height: screenHeight * 0.29,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        PopularItem(
-                          imageUrl: 'assets/p5s.png',
-                          title: 'Final Fantasy 7 Remake Intergrade',
-                          subtitle: 'Arcade',
-                          publisherLogoUrl: 'assets/bc.png',
-                          publisherName: 'Square Enix',
-                          postedTime: 'Posted 35 min ago',
-                          rating: 4.3,
-                        ),
-                        PopularItem(
-                          imageUrl: 'assets/p5s.png',
-                          title: 'Final Fantasy 7 Remake Intergrade',
-                          subtitle: 'Arcade',
-                          publisherLogoUrl: 'assets/bc.png',
-                          publisherName: 'Square Enix',
-                          postedTime: 'Posted 35 min ago',
-                          rating: 4.3,
-                        ),
-                        PopularItem(
-                          imageUrl: 'assets/p5s.png',
-                          title: 'Final Fantasy 7 Remake Intergrade',
-                          subtitle: 'Arcade',
-                          publisherLogoUrl: 'assets/bc.png',
-                          publisherName: 'Square Enix',
-                          postedTime: 'Posted 35 min ago',
-                          rating: 4.3,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  );
+                }
               ),
-            );
-          },
+
+              
+              SizedBox(height: 30),
+              // PC Games Section
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
+                child: Text("Popular Genres",
+                    style: TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              FutureBuilder<List<Map<String, dynamic>>>(
+                future: fetchMainGames('Popular Genres'),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No games found'));
+                  }
+
+                  final games = snapshot.data!;
+                  final pcGames = games.take(10).toList(); // Ambil maksimal 10 game
+
+                  return SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.29, // Tentukan tinggi list
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: pcGames.length,
+                      itemBuilder: (context, index) {
+                        final game = pcGames[index];
+
+                        return PopularItem(
+                          imageUrl: game['image'],
+                          title: game['name'] ?? 'Unknown Name',
+                          platform: game['platforms'],
+                          subtitle: game['genres'] ?? 'Unknown Genres',
+                          esrb: game['esrb_rating'] ?? 'Unknown Publisher',
+                          rating: double.tryParse(game['rating']?.toString() ?? '') ?? 0.0,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+
+              // PC Games Section
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
+                child: Text("PC Games",
+                    style: TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              FutureBuilder<List<Map<String, dynamic>>>(
+                future: fetchMainGames('PC Games'),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No games found'));
+                  }
+
+                  final games = snapshot.data!;
+                  final pcGames = games.take(10).toList(); // Ambil maksimal 10 game
+
+                  return SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.29, // Tentukan tinggi list
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: pcGames.length,
+                      itemBuilder: (context, index) {
+                        final game = pcGames[index];
+
+                        return PopularItem(
+                          imageUrl: game['image'],
+                          title: game['name'] ?? 'Unknown Name',
+                          platform: game['platforms'],
+                          subtitle: game['genres'] ?? 'Unknown Genres',
+                          esrb: game['esrb_rating'] ?? 'Unknown Publisher',
+                          rating: double.tryParse(game['rating']?.toString() ?? '') ?? 0.0,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
+                child: Text("For Everyone",
+                    style: TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              Container(
+                height: screenHeight * 0.29,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    PopularItem(
+                      imageUrl: 'assets/p5s.png',
+                      title: 'Final Fantasy 7 Remake Intergrade',
+                      platform: 'PC',
+                      subtitle: 'Arcade',
+                      esrb: 'Square Enix',
+                      rating: 4.3,
+                    ),
+                    PopularItem(
+                      imageUrl: 'assets/p5s.png',
+                      title: 'Final Fantasy 7 Remake Intergrade',
+                      platform: 'PS',
+                      subtitle: 'Arcade',
+                      esrb: 'Square Enix',
+                      rating: 4.3,
+                    ),
+                    PopularItem(
+                      imageUrl: 'assets/p5s.png',
+                      title: 'Final Fantasy 7 Remake Intergrade',
+                      platform: 'PC',
+                      subtitle: 'Arcade',
+                      esrb: 'Square Enix',
+                      rating: 4.3,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+           
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -457,21 +469,19 @@ class _HomePageState extends State<HomePage> {
 }
 
 class PopularItem extends StatelessWidget {
-  final String imageUrl;
-  final String title;
-  final String subtitle;
-  final String publisherLogoUrl;
-  final String publisherName;
-  final String postedTime;
+  final String imageUrl;          // gambar game
+  final String title;             // judul
+  final String subtitle;          // genre
+  final String platform;
+  final String esrb;
   final double rating;
 
   PopularItem({
     required this.imageUrl,
     required this.title,
     required this.subtitle,
-    required this.publisherLogoUrl,
-    required this.publisherName,
-    required this.postedTime,
+    required this.platform,
+    required this.esrb,
     required this.rating,
   });
 
@@ -487,11 +497,23 @@ class PopularItem extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
+                child: Image.network(
                   imageUrl,
                   height: MediaQuery.of(context).size.height * 0.12,
                   width: MediaQuery.of(context).size.width * 0.4,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Placeholder untuk error gambar
+                    return Container(
+                      height: MediaQuery.of(context).size.height * 0.12,
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      color: Colors.grey[300],
+                      child: Icon(
+                        Icons.image_not_supported,
+                        color: Colors.grey,
+                      ),
+                    );
+                  },
                 ),
               ),
               Positioned(
@@ -535,6 +557,20 @@ class PopularItem extends StatelessWidget {
             ),
           ),
           SizedBox(height: 2),
+          Wrap(
+            spacing: 4,
+            runSpacing: 2,
+            children: platform.split(',').map((p) {
+              return Text(
+                p.trim(),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.black87,
+                ),
+              );
+            }).toList(),
+          ),
+          SizedBox(height: 2),
           Text(
             subtitle,
             style: TextStyle(fontSize: 12, color: Colors.grey),
@@ -542,27 +578,9 @@ class PopularItem extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           SizedBox(height: 2),
-          Row(
-            children: [
-              CircleAvatar(
-                backgroundImage: AssetImage(publisherLogoUrl),
-                radius: 12,
-              ),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  publisherName,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 2),
           Flexible(
             child: Text(
-              postedTime,
+              'ESRB: ' + esrb,
               style: TextStyle(fontSize: 10, color: Colors.grey),
               maxLines: 1, // Batasi hanya 1 baris
               overflow: TextOverflow.ellipsis,
@@ -598,23 +616,6 @@ class InfoBadge extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class publisherInfo extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Image.asset(
-          'assets/bc.png',
-          width: 55,
-          height: 55,
-        ),
-        SizedBox(width: 8),
-        Text('Bandai Namco', style: TextStyle(color: Colors.white)),
-      ],
     );
   }
 }
