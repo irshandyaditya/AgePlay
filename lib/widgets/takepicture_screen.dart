@@ -1,13 +1,15 @@
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:convert';
 import 'package:age_play/pages/displaypicture_screen.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // Import untuk galeri
+import 'package:image_picker/image_picker.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as pathProvider;
 import 'package:image/image.dart' as img;
+import 'package:http/http.dart' as http;
 
 class TakePictureScreen extends StatefulWidget {
   final List<CameraDescription> cameras;
@@ -82,11 +84,22 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         }
       });
     } catch (e) {
-      print("Error message: ${e}");
+      print("Error message: \${e}");
     }
 
     if (mounted) {
       setState(() {});
+    }
+  }
+
+  Future<void> _pickImage(bool fromCamera) async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: fromCamera ? ImageSource.camera : ImageSource.gallery,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
     }
   }
 
@@ -96,7 +109,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     }
 
     final Directory appDir = await pathProvider.getApplicationSupportDirectory();
-    final String capturePath = path.join(appDir.path, '${DateTime.now()}.jpg');
+    final String capturePath = path.join(appDir.path, '\${DateTime.now()}.jpg');
 
     if (controller.value.isTakingPicture) {
       return;
@@ -112,6 +125,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       // waktu loading
       await Future.delayed(Duration(seconds: 2)); 
 
+      File finalImage;
+
       if (_isFrontCamera) {
         final originalImage = File(image.path);
         final bytes = await originalImage.readAsBytes();
@@ -121,25 +136,43 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
         final flippedFile = File(capturePath);
         await flippedFile.writeAsBytes(flippedImageBytes);
-
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => DisplayPictureScreen(
-              imagePath: flippedFile.path,
-            ),
-          ),
-        );
+        finalImage = flippedFile;
       } else {
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => DisplayPictureScreen(
-              imagePath: image.path,
-            ),
-          ),
-        );
+        finalImage = File(image.path);
       }
+
+      // Kirim ke API
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('https://polinemaesports.my.id/api/predict/'),
+      );
+      request.files.add(await http.MultipartFile.fromPath('file', finalImage.path));
+
+      final response = await request.send();
+      Map<String, dynamic>? jsonResponse;
+
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        jsonResponse = json.decode(responseBody);
+        print("Upload sukses: \$jsonResponse");
+      } else {
+        print("Upload gagal: \${response.statusCode}");
+      }
+
+      final age = jsonResponse?['age'] ?? 'Unknown';
+      final gender = jsonResponse?['gender'] ?? 'Unknown';
+
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => DisplayPictureScreen(
+            imagePath: finalImage.path,
+            age: age,
+            gender: gender,
+          ),
+        ),
+      );
     } catch (e) {
-      print("Error capturing photo: $e");
+      print("Error capturing photo: \$e");
     } finally {
       setState(() {
         isLoading = false; // Menyembunyikan loading setelah proses selesai
@@ -147,13 +180,40 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     }
   }
 
-  Future<void> _pickImage(bool fromCamera) async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: fromCamera ? ImageSource.camera : ImageSource.gallery,
-    );
-    if (pickedFile != null) {
+    Future<void> _uploadPhoto(File imageFile) async {
+    const String apiUrl = 'https://polinemaesports.my.id/api/predict/';
+    try {
+      final request = http.MultipartRequest('POST', Uri.parse(apiUrl));
+      request.files.add(await http.MultipartFile.fromPath('file', imageFile.path));
+
+      final response = await request.send();
+      Map<String, dynamic>? jsonResponse;
+
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        jsonResponse = json.decode(responseBody);
+        print("Upload sukses: \$jsonResponse");
+      } else {
+        print("Upload gagal: \${response.statusCode}");
+      }
+
+      final age = jsonResponse?['age'] ?? 'Unknown';
+      final gender = jsonResponse?['gender'] ?? 'Unknown';
+
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => DisplayPictureScreen(
+            imagePath: imageFile.path,
+            age: age,
+            gender: gender,
+          ),
+        ),
+      );
+    } catch (e) {
+      print("Error capturing photo: \$e");
+    } finally {
       setState(() {
-        _image = File(pickedFile.path);
+        isLoading = false; // Menyembunyikan loading setelah proses selesai
       });
     }
   }
