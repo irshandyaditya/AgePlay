@@ -188,53 +188,61 @@ Future<void> checkBookmarkStatus() async {
     return icons;
   }
 
-  Future<List<Widget>> _buildCategoryIcons(List<dynamic>? genres) async {
-    if (genres == null) return [];
+Future<List<Widget>> _buildCategoryIcons(List<dynamic>? genres) async {
+  if (genres == null) return [];
 
-    List<Widget> categories = [];
-    for (var genre in genres) {
-      final genreSlug = genre['slug']; // Mengambil slug genre
-      final genrePath = 'assets/categories/$genreSlug.png';
+  List<Widget> categories = [];
+  for (var genre in genres) {
+    final genreSlug = genre['slug']; // Mengambil slug genre
+    final genrePath = 'assets/categories/$genreSlug.png';
 
-      // Memeriksa apakah aset ada
-      final assetExists = await doesAssetExist(genrePath);
+    // Memeriksa apakah aset ada
+    final assetExists = await doesAssetExist(genrePath);
 
-      categories.add(
-        Column(
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: EdgeInsets.all(14),
-              child: assetExists
-                  ? Image.asset(
-                      genrePath,
-                      width: 20,
-                      height: 20,
-                      fit: BoxFit.contain,
-                    )
-                  : Icon(
-                      Icons.sports_esports,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+    categories.add(
+      Column(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.red,
+              borderRadius: BorderRadius.circular(12),
             ),
-            SizedBox(height: 4),
-            Text(
+            padding: EdgeInsets.all(14),
+            child: assetExists
+                ? Image.asset(
+                    genrePath,
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.contain,
+                  )
+                : Icon(
+                    Icons.sports_esports,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+          ),
+          SizedBox(height: 4),
+          SizedBox(
+            width: 62,
+            height: 40, // Sesuaikan dengan lebar kontainer di atas
+            child: Text(
               genre['name'] ?? '',
               style: TextStyle(fontSize: 14),
+              maxLines: 2, // Maksimal dua baris teks
+              overflow: TextOverflow.ellipsis, // Tambahkan "..." jika teks terpotong
+              textAlign: TextAlign.center, // Pusatkan teks
+              softWrap: true, // Bungkus otomatis jika teks terlalu panjang
             ),
-          ],
-        ),
-      );
-    }
-
-    return categories;
+          ),
+        ],
+      ),
+    );
   }
+  return categories;
+}
+
 
   Future<void> _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
