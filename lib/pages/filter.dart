@@ -6,8 +6,12 @@ class FilterPage extends StatefulWidget {
 }
 
 class _FilterPageState extends State<FilterPage> {
-  String selectedAge = 'All Ages';
-  String selectedCategory = 'All Categories';
+  String selectedGenre = '';
+  String selectedGenreText = 'All Genres';
+  String selectedPlatform = '';
+  String selectedPlatformText = 'All Platforms';
+  String selectedStore = '';
+  String selectedStoreText = 'All Stores';
 
   @override
   Widget build(BuildContext context) {
@@ -26,31 +30,34 @@ class _FilterPageState extends State<FilterPage> {
       ),
       body: Container(
         decoration: BoxDecoration(
-          // Set background color or gradient
-          color: Colors.white, // Change to desired background color
+          color: Colors.white,
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Age Filter Dropdown
+              // Genre Filter Dropdown
               Text(
-                'Age',
+                'Genres',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: selectedAge,
+                value: selectedGenre,
                 onChanged: (value) {
                   setState(() {
-                    selectedAge = value!;
+                    selectedGenre = value!;
+                    selectedGenreText = genreList.firstWhere(
+                      (genre) => genre['value'] == value,
+                      orElse: () => {'text': 'All Genres'},
+                    )['text']!;
                   });
                 },
-                items: ['All Ages', '16+', '18+']
-                    .map((age) => DropdownMenuItem(
-                          value: age,
-                          child: Text(age),
+                items: genreList
+                    .map((genre) => DropdownMenuItem(
+                          value: genre['value'],
+                          child: Text(genre['text']!),
                         ))
                     .toList(),
                 decoration: InputDecoration(
@@ -63,23 +70,60 @@ class _FilterPageState extends State<FilterPage> {
                 ),
               ),
               SizedBox(height: 16),
-              // Category Filter Dropdown
+              // Parent Platforms Filter Dropdown
               Text(
-                'Categories',
+                'Parent Platforms',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: selectedCategory,
+                value: selectedPlatform,
                 onChanged: (value) {
                   setState(() {
-                    selectedCategory = value!;
+                    selectedPlatform = value!;
+                    selectedPlatformText = platformList.firstWhere(
+                      (platform) => platform['value'] == value,
+                      orElse: () => {'text': 'All Platforms'},
+                    )['text']!;
                   });
                 },
-                items: ['All Categories', 'Action', 'Adventure', 'RPG']
-                    .map((category) => DropdownMenuItem(
-                          value: category,
-                          child: Text(category),
+                items: platformList
+                    .map((platform) => DropdownMenuItem(
+                          value: platform['value'],
+                          child: Text(platform['text']!),
+                        ))
+                    .toList(),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+              // Store Filter Dropdown
+              Text(
+                'Stores',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: selectedStore,
+                onChanged: (value) {
+                  setState(() {
+                    selectedStore = value!;
+                    selectedStoreText = storeList.firstWhere(
+                      (store) => store['value'] == value,
+                      orElse: () => {'text': 'All Stores'},
+                    )['text']!;
+                  });
+                },
+                items: storeList
+                    .map((store) => DropdownMenuItem(
+                          value: store['value'],
+                          child: Text(store['text']!),
                         ))
                     .toList(),
                 decoration: InputDecoration(
@@ -92,18 +136,21 @@ class _FilterPageState extends State<FilterPage> {
                 ),
               ),
               Spacer(),
-              // Apply Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context, {
-                      'age': selectedAge,
-                      'category': selectedCategory,
+                      'genres': selectedGenre,
+                      'parent_platforms': selectedPlatform,
+                      'stores': selectedStore,
+                      'genreText': selectedGenreText,
+                      'platformText': selectedPlatformText,
+                      'storeText': selectedStoreText,
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red, // Button background color
+                    backgroundColor: Colors.red,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -121,3 +168,59 @@ class _FilterPageState extends State<FilterPage> {
     );
   }
 }
+
+// Data lists for dropdown menus
+const genreList = [
+  {'text': 'All Genres', 'value': ''},
+  {'text': 'Action', 'value': 'action'},
+  {'text': 'Indie', 'value': 'indie'},
+  {'text': 'Adventure', 'value': 'adventure'},
+  {'text': 'RPG', 'value': 'role-playing-games-rpg'},
+  {'text': 'Strategy', 'value': 'strategy'},
+  {'text': 'Shooter', 'value': 'shooter'},
+  {'text': 'Casual', 'value': 'casual'},
+  {'text': 'Simulation', 'value': 'simulation'},
+  {'text': 'Puzzle', 'value': 'puzzle'},
+  {'text': 'Arcade', 'value': 'arcade'},
+  {'text': 'Platformer', 'value': 'platformer'},
+  {'text': 'Racing', 'value': 'racing'},
+  {'text': 'MMO', 'value': 'massively-multiplayer'},
+  {'text': 'Sports', 'value': 'sports'},
+  {'text': 'Fighting', 'value': 'fighting'},
+  {'text': 'Family', 'value': 'family'},
+  {'text': 'Board Games', 'value': 'board-games'},
+  {'text': 'Card', 'value': 'card'},
+  {'text': 'Educational', 'value': 'educational'},
+];
+
+const platformList = [
+  {'text': 'All Platforms', 'value': ''},
+  {'text': 'PC', 'value': '1'},
+  {'text': 'PlayStation', 'value': '2'},
+  {'text': 'Xbox', 'value': '3'},
+  {'text': 'iOS', 'value': '4'},
+  {'text': 'Mac', 'value': '5'},
+  {'text': 'Linux', 'value': '6'},
+  {'text': 'Nintendo', 'value': '7'},
+  {'text': 'Android', 'value': '8'},
+  {'text': 'Atari', 'value': '9'},
+  {'text': 'Commodore / Amiga', 'value': '10'},
+  {'text': 'SEGA', 'value': '11'},
+  {'text': '3DO', 'value': '12'},
+  {'text': 'Neo Geo', 'value': '13'},
+  {'text': 'Web', 'value': '14'},
+];
+
+const storeList = [
+  {'text': 'All Stores', 'value': ''},
+  {'text': 'Steam', 'value': '1'},
+  {'text': 'PlayStation Store', 'value': '3'},
+  {'text': 'Xbox Store', 'value': '2'},
+  {'text': 'App Store', 'value': '4'},
+  {'text': 'GOG', 'value': '5'},
+  {'text': 'Nintendo Store', 'value': '6'},
+  {'text': 'Xbox 360 Store', 'value': '7'},
+  {'text': 'Google Play', 'value': '8'},
+  {'text': 'itch.io', 'value': '9'},
+  {'text': 'Epic Games', 'value': '11'},
+];

@@ -206,7 +206,7 @@ class _EditProfileState extends State<EditProfile> {
                     ),
                     const SizedBox(height: 64),
                     _buildEditableField(
-                      label: 'Input Password',
+                      label: 'Confirm Password',
                       isPassword: true,
                       onSaved: (value) => _password = value ?? '',
                     ),
