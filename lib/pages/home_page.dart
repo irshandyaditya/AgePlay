@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:age_play/widgets/bottom_navbar.dart';
 import 'package:http/http.dart' as http;
@@ -20,6 +19,9 @@ class _HomePageState extends State<HomePage> {
   String? _name;
   String? _profilePicture;
 
+  // Map to store cached responses for categories
+  final Map<String, List<Map<String, dynamic>>> _cache = {};
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +40,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<List<Map<String, dynamic>>> fetchMainGames(String? category) async {
+    // Check if the category is already cached
+    if (_cache.containsKey(category)) {
+      return _cache[category]!;
+    }
+
     final response;
     if (category == 'Popular Genres') {
       response = await http.get(Uri.parse(
@@ -55,11 +62,13 @@ class _HomePageState extends State<HomePage> {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
+      List<Map<String, dynamic>> result;
+
       if (category == 'For Everyone') {
         final List<dynamic> gameList =
             jsonResponse['results'];
 
-        return gameList.map((game) {
+        result = gameList.map((game) {
           return {
             'slug': game['slug'] ?? 'Unknown Slug',
             'name': game['name'] ?? 'Unknown Game',
@@ -74,7 +83,7 @@ class _HomePageState extends State<HomePage> {
         }).toList();
       } else {
         final List<dynamic> gameList = jsonResponse['results'];
-        return gameList.map((game) {
+        result = gameList.map((game) {
           return {
             'slug': game['slug'] ?? 'Unknown Slug',
             'name': game['name'] ?? 'Unknown Game',
@@ -93,10 +102,20 @@ class _HomePageState extends State<HomePage> {
           };
         }).toList();
       }
+
+      // Cache the response for the specific category
+      if (category != null) {
+        _cache[category] = result;
+      } else {
+        _cache['default'] = result;
+      }
+
+      return result;
     } else {
       throw Exception('Failed to load games');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +186,7 @@ class _HomePageState extends State<HomePage> {
                   future: fetchMainGames('Main'),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
+                      return Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 255, 0 ,0),));
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Error: ${snapshot.error}'));
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -318,7 +337,7 @@ class _HomePageState extends State<HomePage> {
                 future: fetchMainGames('Popular Genres'),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 255, 0 ,0)));
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -365,7 +384,7 @@ class _HomePageState extends State<HomePage> {
                 future: fetchMainGames('PC Games'),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 255, 0 ,0)));
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -412,7 +431,7 @@ class _HomePageState extends State<HomePage> {
                 future: fetchMainGames('For Everyone'),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 255, 0 ,0 )));
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

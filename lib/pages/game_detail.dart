@@ -259,7 +259,7 @@ Future<List<Widget>> _buildCategoryIcons(List<dynamic>? genres) async {
   Widget build(BuildContext context) {
     if (gameDetails == null || storeLinks == null) {
       return Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(child: CircularProgressIndicator(color: Colors.red)),
       );
     }
 

@@ -218,7 +218,7 @@ class _SearchPageState extends State<SearchPage> {
           ],
           Expanded(
             child: _isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator(color: Colors.red))
                 : searchResults.isEmpty
                     ? Center(
                         child: Text(

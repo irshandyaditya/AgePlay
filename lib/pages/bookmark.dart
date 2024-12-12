@@ -105,7 +105,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
         automaticallyImplyLeading: false,
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator( color: Colors.red,))
           : gameDetails.isEmpty
               ? Center(child: Text("No bookmarks found."))
               : ListView.builder(
