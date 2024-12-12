@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'package:age_play/pages/profile.dart';
 import 'package:http/http.dart' as http;
 
 class EditProfile extends StatefulWidget {
@@ -112,7 +113,10 @@ class _EditProfileState extends State<EditProfile> {
             );
 
             // Navigasi ke halaman profil
-            Navigator.pushNamed(context, '/profile');
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Profile()),
+            );
           } else {
             throw Exception(
                 jsonResponse['error'] ?? "Gagal memperbarui profil.");
