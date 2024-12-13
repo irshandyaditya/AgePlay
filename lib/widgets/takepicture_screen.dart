@@ -28,7 +28,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   bool _isFrontCamera = false;
   //for flash
   bool _isFlashOn = false;
-  bool isLoading = false; // Menambahkan variabel isLoading
+  bool isLoading = false;
   File? _image;
 
   @override
@@ -100,6 +100,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       setState(() {
         _image = File(pickedFile.path);
       });
+      _uploadPhoto(_image!);
     }
   }
 
@@ -117,12 +118,11 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
     try {
       setState(() {
-        isLoading = true; // Mengatur isLoading menjadi true saat proses memulai
+        isLoading = true;
       });
 
       final image = await controller.takePicture();
 
-      // waktu loading
       await Future.delayed(Duration(seconds: 2)); 
 
       File finalImage;
@@ -141,48 +141,19 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         finalImage = File(image.path);
       }
 
-      // Kirim ke API
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('https://polinemaesports.my.id/api/predict/'),
-      );
-      request.files.add(await http.MultipartFile.fromPath('file', finalImage.path));
-
-      final response = await request.send();
-      Map<String, dynamic>? jsonResponse;
-
-      if (response.statusCode == 200) {
-        final responseBody = await response.stream.bytesToString();
-        jsonResponse = json.decode(responseBody);
-        print("Upload sukses: \$jsonResponse");
-      } else {
-        print("Upload gagal: \${response.statusCode}");
-      }
-
-      final age = jsonResponse?['age'] ?? 'Unknown';
-      final gender = jsonResponse?['gender'] ?? 'Unknown';
-
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => DisplayPictureScreen(
-            imagePath: finalImage.path,
-            age: age,
-            gender: gender,
-          ),
-        ),
-      );
+      _uploadPhoto(finalImage);
     } catch (e) {
       print("Error capturing photo: \$e");
-    } finally {
-      setState(() {
-        isLoading = false; // Menyembunyikan loading setelah proses selesai
-      });
     }
   }
 
-    Future<void> _uploadPhoto(File imageFile) async {
+  Future<void> _uploadPhoto(File imageFile) async {
     const String apiUrl = 'https://polinemaesports.my.id/api/predict/';
     try {
+      setState(() {
+        isLoading = true;
+      });
+      
       final request = http.MultipartRequest('POST', Uri.parse(apiUrl));
       request.files.add(await http.MultipartFile.fromPath('file', imageFile.path));
 
@@ -213,7 +184,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       print("Error capturing photo: \$e");
     } finally {
       setState(() {
-        isLoading = false; // Menyembunyikan loading setelah proses selesai
+        isLoading = false;
       });
     }
   }
@@ -301,17 +272,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              // Expanded(
-                              //   child: Center(
-                              //     child: Text(
-                              //       "Video",
-                              //       style: TextStyle(
-                              //         color: Colors.white,
-                              //         fontWeight: FontWeight.bold,
-                              //       ),
-                              //     ),
-                              //   ),
-                              // ),
                             ],
                           ),
                         ),
