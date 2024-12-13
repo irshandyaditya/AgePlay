@@ -61,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
         await storage.write(key: 'email', value: responseData['user']['email']);
         await storage.write(key: 'foto_profil', value: responseData['user']['foto_profil']);
 
-        Navigator.pushNamed(context, '/home');
+        Navigator.pushReplacementNamed(context, '/home');
         } else {
           setState(() {
             _errorMessage = responseData['message'] ?? 'Login failed';

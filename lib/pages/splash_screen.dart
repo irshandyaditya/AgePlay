@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:another_flutter_splash_screen/another_flutter_splash_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Splashscreen extends StatelessWidget {
   const Splashscreen({super.key});
@@ -32,8 +33,17 @@ class Splashscreen extends StatelessWidget {
       ),
       duration: const Duration(milliseconds: 4500),
       animationDuration: const Duration(milliseconds: 1000),
-      onAnimationEnd: () {
-        Navigator.pushReplacementNamed(context, '/login');
+      onAnimationEnd: () async {
+        final FlutterSecureStorage storage = const FlutterSecureStorage();
+
+        // Periksa apakah token login tersedia
+        String? token = await storage.read(key: 'auth_token');
+
+        if (token != null) {
+          Navigator.pushReplacementNamed(context, '/home');
+        } else {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
       },
     );
   }
