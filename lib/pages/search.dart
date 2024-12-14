@@ -21,7 +21,7 @@ class _SearchPageState extends State<SearchPage> {
   int _currentIndex = 1;
   bool _isLoading = false;
   bool _isFilterApplied = false;
-  Map<String, String>? _filterData; // Store applied filter data (age, category)
+  Map<String, String>? _filterData;
 
   @override
   void initState() {

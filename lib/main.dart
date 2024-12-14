@@ -7,8 +7,10 @@ import 'package:age_play/pages/sign_up.dart';
 import 'package:age_play/pages/home_page.dart';
 import 'package:age_play/pages/camera.dart';
 import 'package:age_play/pages/about.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Menyesuaikan status bar menggunakan SystemChrome
   SystemChrome.setSystemUIOverlayStyle(
@@ -17,7 +19,7 @@ void main() {
       statusBarIconBrightness: Brightness.dark, // Ikon terang (untuk background gelap)
     ),
   );
-
+  await Hive.initFlutter();
   runApp(MyApp());
 }
 

@@ -46,6 +46,8 @@ dependencies:
   dio: ^5.0.0
   flutter_svg: ^2.0.16
   url_launcher: ^6.3.1
+  hive: ^2.0.4
+  hive_flutter: ^1.1.0
 
 dev_dependencies:
   flutter_test:

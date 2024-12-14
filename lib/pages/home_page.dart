@@ -6,6 +6,8 @@ import 'package:age_play/pages/search.dart';
 import 'package:age_play/pages/game_detail.dart';
 import 'package:age_play/pages/profile.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -19,7 +21,6 @@ class _HomePageState extends State<HomePage> {
   String? _name;
   String? _profilePicture;
 
-  // Map to store cached responses for categories
   final Map<String, List<Map<String, dynamic>>> _cache = {};
 
   @override
@@ -30,8 +31,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadProfileData() async {
     final name = await storage.read(key: 'name');
-    final profilePicture =
-        await storage.read(key: 'foto_profil');
+    final profilePicture = await storage.read(key: 'foto_profil');
 
     setState(() {
       _name = name ?? 'Unknown';
@@ -40,9 +40,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<List<Map<String, dynamic>>> fetchMainGames(String? category) async {
-    // Check if the category is already cached
-    if (_cache.containsKey(category)) {
-      return _cache[category]!;
+    final box = await Hive.openBox<List>('gameCache');
+
+    // Check if the category data is cached
+    if (box.containsKey(category)) {
+      return List<Map<String, dynamic>>.from(box.get(category)!);
     }
 
     final response;
@@ -65,8 +67,7 @@ class _HomePageState extends State<HomePage> {
       List<Map<String, dynamic>> result;
 
       if (category == 'For Everyone') {
-        final List<dynamic> gameList =
-            jsonResponse['results'];
+        final List<dynamic> gameList = jsonResponse['results'];
 
         result = gameList.map((game) {
           return {
@@ -74,8 +75,7 @@ class _HomePageState extends State<HomePage> {
             'name': game['name'] ?? 'Unknown Game',
             'image':
                 game['background_image'] ?? 'https://via.placeholder.com/150',
-            'platforms': game['parent_platforms']?.join(', ') ??
-                'Unknown',
+            'platforms': game['parent_platforms']?.join(', ') ?? 'Unknown',
             'rating': game['rating']?.toString() ?? 'N/A',
             'genres': game['genres']?.join(', ') ?? 'N/A',
             'esrb_rating': game['esrb_rating'] ?? 'N/A',
@@ -103,19 +103,13 @@ class _HomePageState extends State<HomePage> {
         }).toList();
       }
 
-      // Cache the response for the specific category
-      if (category != null) {
-        _cache[category] = result;
-      } else {
-        _cache['default'] = result;
-      }
+    await box.put(category, result);
 
       return result;
     } else {
       throw Exception('Failed to load games');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -134,8 +128,7 @@ class _HomePageState extends State<HomePage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => Profile()),
+                  MaterialPageRoute(builder: (context) => Profile()),
                 );
               },
               child: CircleAvatar(
@@ -167,8 +160,7 @@ class _HomePageState extends State<HomePage> {
                     pageBuilder: (context, animation, secondaryAnimation) =>
                         SearchPage(),
                     transitionDuration: Duration.zero,
-                    reverseTransitionDuration:
-                        Duration.zero,
+                    reverseTransitionDuration: Duration.zero,
                   ),
                 );
               },
@@ -186,15 +178,40 @@ class _HomePageState extends State<HomePage> {
                   future: fetchMainGames('Main'),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 255, 0 ,0),));
+                      return Center(
+                        child: CircularProgressIndicator(
+                            color: Color.fromARGB(255, 255, 0, 0)),
+                      );
                     } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Error: ${snapshot.error}'),
+                            SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {}); // Trigger reload
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text('Retry',
+                                  style: TextStyle(color: Colors.white)),
+                            ),
+                          ],
+                        ),
+                      );
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return Center(child: Text('No games found'));
                     }
                     final games = snapshot.data!;
-                    final topGames =
-                        games.take(5).toList();
+                    final topGames = games.take(5).toList();
                     return Container(
                       height: screenHeight * 0.45,
                       child: PageView.builder(
@@ -325,7 +342,6 @@ class _HomePageState extends State<HomePage> {
                       ),
                     );
                   }),
-
               SizedBox(height: 30),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
@@ -337,20 +353,43 @@ class _HomePageState extends State<HomePage> {
                 future: fetchMainGames('Popular Genres'),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 255, 0 ,0)));
+                    return Center(
+                      child: CircularProgressIndicator(
+                          color: Color.fromARGB(255, 255, 0, 0)),
+                    );
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Error: ${snapshot.error}'),
+                          SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {}); // Trigger reload
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text('Retry',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    );
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return Center(child: Text('No games found'));
                   }
 
                   final games = snapshot.data!;
-                  final pcGames =
-                      games.take(10).toList();
+                  final pcGames = games.take(10).toList();
 
                   return SizedBox(
-                    height: MediaQuery.of(context).size.height *
-                        0.29,
+                    height: MediaQuery.of(context).size.height * 0.29,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: pcGames.length,
@@ -373,7 +412,6 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-
               Padding(
                 padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
                 child: Text("PC Games",
@@ -384,20 +422,43 @@ class _HomePageState extends State<HomePage> {
                 future: fetchMainGames('PC Games'),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 255, 0 ,0)));
+                    return Center(
+                      child: CircularProgressIndicator(
+                          color: Color.fromARGB(255, 255, 0, 0)),
+                    );
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Error: ${snapshot.error}'),
+                          SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {}); // Trigger reload
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text('Retry',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    );
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return Center(child: Text('No games found'));
                   }
 
                   final games = snapshot.data!;
-                  final pcGames =
-                      games.take(10).toList();
+                  final pcGames = games.take(10).toList();
 
                   return SizedBox(
-                    height: MediaQuery.of(context).size.height *
-                        0.29,
+                    height: MediaQuery.of(context).size.height * 0.29,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: pcGames.length,
@@ -420,7 +481,6 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-
               Padding(
                 padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
                 child: Text("For Everyone",
@@ -431,9 +491,34 @@ class _HomePageState extends State<HomePage> {
                 future: fetchMainGames('For Everyone'),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator(color: Color.fromARGB(255, 255, 0 ,0 )));
+                    return Center(
+                      child: CircularProgressIndicator(
+                          color: Color.fromARGB(255, 255, 0, 0)),
+                    );
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Error: ${snapshot.error}'),
+                          SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {}); // Trigger reload
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text('Retry',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    );
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return Center(child: Text('No games found'));
                   }
@@ -442,8 +527,7 @@ class _HomePageState extends State<HomePage> {
                   final games3 = games.toList();
 
                   return SizedBox(
-                    height: MediaQuery.of(context).size.height *
-                        0.29,
+                    height: MediaQuery.of(context).size.height * 0.29,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: games3.length,
@@ -512,118 +596,118 @@ class PopularItem extends StatelessWidget {
   });
 
   @override
-Widget build(BuildContext context) {
-  return GestureDetector(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => GameDetailsPage(slug: slug),
-        ),
-      );
-    },
-    child: Container(
-      width: 160,
-      margin: EdgeInsets.all(8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                imageUrl,
-                height: MediaQuery.of(context).size.height * 0.12,
-                width: MediaQuery.of(context).size.width * 0.4,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GameDetailsPage(slug: slug),
+          ),
+        );
+      },
+      child: Container(
+        width: 160,
+        margin: EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    imageUrl,
                     height: MediaQuery.of(context).size.height * 0.12,
                     width: MediaQuery.of(context).size.width * 0.4,
-                    color: Colors.grey[300],
-                    child: Icon(
-                      Icons.image_not_supported,
-                      color: Colors.grey,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: MediaQuery.of(context).size.height * 0.12,
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        color: Colors.grey[300],
+                        child: Icon(
+                          Icons.image_not_supported,
+                          color: Colors.grey,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  );
-                },
+                    child: Row(
+                      children: [
+                        Icon(Icons.star, color: Colors.yellow, size: 16),
+                        SizedBox(width: 4),
+                        Text(
+                          rating.toString(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            Flexible(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.star, color: Colors.yellow, size: 16),
-                    SizedBox(width: 4),
-                    Text(
-                      rating.toString(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
+            SizedBox(height: 2),
+            Wrap(
+              spacing: 4,
+              runSpacing: 2,
+              children: platform.split(',').map((p) {
+                return Text(
+                  p.trim(),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black87,
+                  ),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            SizedBox(height: 2),
+            Flexible(
+              child: Text(
+                'ESRB: ' + esrb,
+                style: TextStyle(fontSize: 10, color: Colors.grey),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
         ),
-        SizedBox(height: 8),
-        Flexible(
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        SizedBox(height: 2),
-        Wrap(
-          spacing: 4,
-          runSpacing: 2,
-          children: platform.split(',').map((p) {
-            return Text(
-              p.trim(),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.black87,
-              ),
-            );
-          }).toList(),
-        ),
-        SizedBox(height: 2),
-        Text(
-          subtitle,
-          style: TextStyle(fontSize: 12, color: Colors.grey),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        SizedBox(height: 2),
-        Flexible(
-          child: Text(
-            'ESRB: ' + esrb,
-            style: TextStyle(fontSize: 10, color: Colors.grey),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    ),
-  ),
-);
-}
+      ),
+    );
+  }
 }
 
 class InfoBadge extends StatelessWidget {
