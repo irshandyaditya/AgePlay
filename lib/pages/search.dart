@@ -6,9 +6,9 @@ import 'package:age_play/pages/game_detail.dart';
 import 'package:age_play/pages/filter.dart';
 
 class SearchPage extends StatefulWidget {
-  final String? previousPage;
+  final String? esrb;
 
-  SearchPage({this.previousPage});
+  SearchPage({this.esrb});
 
   @override
   _SearchPageState createState() => _SearchPageState();
@@ -31,13 +31,16 @@ class _SearchPageState extends State<SearchPage> {
         _searchQuery = _searchController.text;
       });
     });
+    if (widget.esrb != null) {
+      _applyFilterEsrb(widget.esrb!);
+      _isFilterApplied = true;
+    }
   }
 
   Future<void> _performSearch() async {
     setState(() {
       _isLoading = true;
     });
-
     // Siapkan URL dan parameter filter
     final url = Uri.parse('https://polinemaesports.my.id/api/game-lists/');
     final params = {
@@ -104,6 +107,47 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
+  void _applyFilterEsrb(String esrb) async {
+    setState(() {
+      _isLoading = true;
+      _isFilterApplied = true; // Tandai bahwa filter diterapkan
+      _filterData = {'esrb_rating': esrb}; // Simpan data filter ESRB
+    });
+
+    try {
+      // Gunakan ESRB yang diterima dari halaman DisplayPictureScreen
+      final url =
+          Uri.parse('https://polinemaesports.my.id/api/game-esrb/$esrb');
+      print(esrb);
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> results = data['results'];
+        setState(() {
+          searchResults = results.map((item) {
+            return {
+              'slug': item['slug'],
+              'name': item['name'],
+              'platforms': item['parent_platforms']?.join(', ') ?? 'Unknown',
+              'rating': item['rating']?.toString() ?? 'N/A',
+              'genres': item['genres']?.join(', ') ?? 'N/A',
+              'esrb_rating': item['esrb_rating'] ?? 'N/A',
+              'screenshot': item['background_image'] ?? 'https://via.placeholder.com/150',
+            };
+          }).toList();
+        });
+      } else {
+        print("Failed to fetch data. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Exception: $e");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -164,7 +208,9 @@ class _SearchPageState extends State<SearchPage> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: IconButton(
-                    onPressed: _applyFilter,
+                    onPressed: () {
+                      _applyFilter();
+                    },
                     icon: Icon(Icons.tune_rounded,
                         color: _isFilterApplied ? Colors.white : Colors.black),
                   ),

@@ -21,8 +21,6 @@ class _HomePageState extends State<HomePage> {
   String? _name;
   String? _profilePicture;
 
-  final Map<String, List<Map<String, dynamic>>> _cache = {};
-
   @override
   void initState() {
     super.initState();
@@ -39,12 +37,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<List<Map<String, dynamic>>> fetchMainGames(String? category) async {
+  Future<List<Map<dynamic, dynamic>>> fetchMainGames(String? category) async {
     final box = await Hive.openBox<List>('gameCache');
 
     // Check if the category data is cached
     if (box.containsKey(category)) {
-      return List<Map<String, dynamic>>.from(box.get(category)!);
+      return List<Map<dynamic, dynamic>>.from(box.get(category)!);
     }
 
     final response;
@@ -63,8 +61,8 @@ class _HomePageState extends State<HomePage> {
     }
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse = json.decode(response.body);
-      List<Map<String, dynamic>> result;
+      final Map<dynamic, dynamic> jsonResponse = json.decode(response.body);
+      List<Map<dynamic, dynamic>> result;
 
       if (category == 'For Everyone') {
         final List<dynamic> gameList = jsonResponse['results'];
@@ -174,7 +172,7 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 16),
-              FutureBuilder<List<Map<String, dynamic>>>(
+              FutureBuilder<List<Map<dynamic, dynamic>>>(
                   future: fetchMainGames('Main'),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -349,7 +347,7 @@ class _HomePageState extends State<HomePage> {
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
-              FutureBuilder<List<Map<String, dynamic>>>(
+              FutureBuilder<List<Map<dynamic, dynamic>>>(
                 future: fetchMainGames('Popular Genres'),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -418,7 +416,7 @@ class _HomePageState extends State<HomePage> {
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
-              FutureBuilder<List<Map<String, dynamic>>>(
+              FutureBuilder<List<Map<dynamic, dynamic>>>(
                 future: fetchMainGames('PC Games'),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -487,7 +485,7 @@ class _HomePageState extends State<HomePage> {
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
-              FutureBuilder<List<Map<String, dynamic>>>(
+              FutureBuilder<List<Map<dynamic, dynamic>>>(
                 future: fetchMainGames('For Everyone'),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {

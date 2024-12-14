@@ -16,7 +16,7 @@ class DisplayPictureScreen extends StatelessWidget {
       required this.gender});
 
   String determineEsrbRating(String? age) {
-    if (age == null) return 'adults-only';
+    if (age == null) return 'everyone';
     if (age == "0-3 years" || age == "4-7 years") return 'everyone';
     if (age == "8-12 years") return 'everyone-10-plus';
     if (age == "13-17 years") return 'teen';
@@ -157,7 +157,8 @@ class DisplayPictureScreen extends StatelessWidget {
                                   child: Column(
                                     children: [
                                       GameRecommendation(
-                                        imageName: game['background_image'] ?? '',
+                                        imageName:
+                                            game['background_image'] ?? '',
                                         title: game['name'] ?? '-',
                                         platform: (game['parent_platforms']
                                                 as List<dynamic>)
@@ -188,14 +189,19 @@ class DisplayPictureScreen extends StatelessWidget {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => SearchPage(
-                                          previousPage: 'hasil deteksi',
+                                          esrb: esrbRating,
                                         )),
                               );
                             },
-                            child: Text("Lainnya"),
+                            child: Text(
+                              "Lainnya",
+                              style: TextStyle(color: Colors.white),
+                            ),
                             style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                             ),
                           ),
@@ -262,35 +268,47 @@ class GameRecommendation extends StatelessWidget {
           ),
         ),
         SizedBox(width: 20),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              platform.join(', '),
-              style: TextStyle(fontSize: 12, color: Colors.black),
-            ),
-            Text(
-              genre.join(', '),
-              style: TextStyle(
-                fontSize: 10,
-                color: Colors.grey,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              rating,
-              style: TextStyle(color: Colors.green),
-            ),
-            Text(
-              publisher,
-              style: TextStyle(fontSize: 12, color: Colors.black),
-            ),
-          ],
+              Wrap(
+                spacing: 5,
+                runSpacing: 5,
+                children: [
+                  Text(
+                    platform.join(', '),
+                    style: TextStyle(fontSize: 12, color: Colors.black),
+                  ),
+                ],
+              ),
+              Wrap(
+                spacing: 5,
+                runSpacing: 5,
+                children: [
+                  Text(
+                    genre.join(', '),
+                    style: TextStyle(fontSize: 10, color: Colors.grey),
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+              Text(
+                rating,
+                style: TextStyle(color: Colors.green),
+              ),
+              Text(
+                publisher,
+                style: TextStyle(fontSize: 12, color: Colors.black),
+              ),
+            ],
+          ),
         ),
       ],
     );

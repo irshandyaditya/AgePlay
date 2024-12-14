@@ -68,7 +68,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
             'name': data['name'] ?? "Unknown Game",
             'image':
                 data['background_image'] ?? 'https://via.placeholder.com/150',
-            'platforms': data['platforms']
+            'parent_platforms': data['parent_platforms']
                     ?.map((p) => p['platform']['name'])
                     ?.toList()
                     ?.join(', ') ??
@@ -177,7 +177,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
                                     ],
                                   ),
                                   Text(
-                                    "Platforms: ${item["platforms"]}",
+                                    "Platforms: ${item["parent_platforms"]}",
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: Colors.black87,
