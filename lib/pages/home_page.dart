@@ -55,6 +55,15 @@ class _HomePageState extends State<HomePage> {
     } else if (category == 'For Everyone') {
       response = await http.get(
           Uri.parse('http://polinemaesports.my.id/api/game-esrb/everyone'));
+    } else if (category == 'Indie Games') {
+      response = await http.get(
+          Uri.parse('http://polinemaesports.my.id/api/game-lists?genres=indie&ordering=-metacritic'));
+    } else if (category == 'Android Games') {
+      response = await http.get(
+          Uri.parse('http://polinemaesports.my.id/api/game-lists?parent_platforms=8&ordering=-metacritic'));
+    } else if (category == 'Sport Games') {
+      response = await http.get(
+          Uri.parse('http://polinemaesports.my.id/api/game-lists?genres=sports&ordering=-metacritic'));
     } else {
       response = await http
           .get(Uri.parse('https://polinemaesports.my.id/api/game-lists/'));
@@ -413,6 +422,79 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
+
+              // sport games
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
+                child: Text("Sport Games",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              FutureBuilder<List<Map<dynamic, dynamic>>>(
+                future: fetchMainGames('Sport Games'),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                          color: Color.fromARGB(255, 255, 0, 0)),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Error: ${snapshot.error}'),
+                          SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {}); // Trigger reload
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text('Retry',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No games found'));
+                  }
+
+                  final games = snapshot.data!;
+                  final pcGames = games.take(10).toList();
+
+                  return SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.29,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: pcGames.length,
+                      itemBuilder: (context, index) {
+                        final game = pcGames[index];
+
+                        return PopularItem(
+                          slug: game['slug'],
+                          imageUrl: game['image'],
+                          title: game['name'] ?? 'Unknown Name',
+                          platform: game['platforms'],
+                          subtitle: game['genres'] ?? 'Unknown Genres',
+                          esrb: game['esrb_rating'] ?? 'Unknown Publisher',
+                          rating: double.tryParse(
+                                  game['rating']?.toString() ?? '') ??
+                              0.0,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+
+              // pc games section
               Padding(
                 padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
                 child: Text("PC Games",
@@ -482,6 +564,150 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
+
+              // android games section
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
+                child: Text("Android Games",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              FutureBuilder<List<Map<dynamic, dynamic>>>(
+                future: fetchMainGames('Android Games'),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                          color: Color.fromARGB(255, 255, 0, 0)),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Error: ${snapshot.error}'),
+                          SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {}); // Trigger reload
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text('Retry',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No games found'));
+                  }
+
+                  final games = snapshot.data!;
+                  final pcGames = games.take(10).toList();
+
+                  return SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.29,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: pcGames.length,
+                      itemBuilder: (context, index) {
+                        final game = pcGames[index];
+
+                        return PopularItem(
+                          slug: game['slug'],
+                          imageUrl: game['image'],
+                          title: game['name'] ?? 'Unknown Name',
+                          platform: game['platforms'],
+                          subtitle: game['genres'] ?? 'Unknown Genres',
+                          esrb: game['esrb_rating'] ?? 'Unknown Publisher',
+                          rating: double.tryParse(
+                                  game['rating']?.toString() ?? '') ??
+                              0.0,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+
+              // Indie Games
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
+                child: Text("Indie Games",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              FutureBuilder<List<Map<dynamic, dynamic>>>(
+                future: fetchMainGames('Indie Games'),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                          color: Color.fromARGB(255, 255, 0, 0)),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Error: ${snapshot.error}'),
+                          SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {}); // Trigger reload
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text('Retry',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No games found'));
+                  }
+
+                  final games = snapshot.data!;
+                  final pcGames = games.take(10).toList();
+
+                  return SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.29,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: pcGames.length,
+                      itemBuilder: (context, index) {
+                        final game = pcGames[index];
+
+                        return PopularItem(
+                          slug: game['slug'],
+                          imageUrl: game['image'],
+                          title: game['name'] ?? 'Unknown Name',
+                          platform: game['platforms'],
+                          subtitle: game['genres'] ?? 'Unknown Genres',
+                          esrb: game['esrb_rating'] ?? 'Unknown Publisher',
+                          rating: double.tryParse(
+                                  game['rating']?.toString() ?? '') ??
+                              0.0,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+
+              // for everyone section
               Padding(
                 padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 16.0),
                 child: Text("For Everyone",
