@@ -41,10 +41,10 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
   }
 
   Future<void> _initializeData() async {
-  await _loadProfileData(); // Tunggu hingga data profil selesai dimuat
-  fetchGameDetails();
-  checkBookmarkStatus(); // Panggil setelah _id berhasil diperbarui
-}
+    await _loadProfileData(); // Tunggu hingga data profil selesai dimuat
+    fetchGameDetails();
+    checkBookmarkStatus(); // Panggil setelah _id berhasil diperbarui
+  }
 
   Future<void> _loadProfileData() async {
     final id = await storage.read(key: 'id');
@@ -54,36 +54,35 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
     });
   }
 
-Future<void> checkBookmarkStatus() async {
-  try {
-    final url = "https://polinemaesports.my.id/api/bookmark/check/";
-    final request = http.MultipartRequest('POST', Uri.parse(url));
-    request.fields['id_game'] = widget.slug;
-    request.fields['akun_id'] = _id ?? '0';
+  Future<void> checkBookmarkStatus() async {
+    try {
+      final url = "https://polinemaesports.my.id/api/bookmark/check/";
+      final request = http.MultipartRequest('POST', Uri.parse(url));
+      request.fields['id_game'] = widget.slug;
+      request.fields['akun_id'] = _id ?? '0';
 
-    // Log data yang dikirim
-    print("Sending request to $url with fields: ${request.fields}");
+      // Log data yang dikirim
+      print("Sending request to $url with fields: ${request.fields}");
 
-    final response = await request.send();
-    final responseBody = await response.stream.bytesToString();
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
 
-    if (response.statusCode == 200) {
-      final responseData = json.decode(responseBody);
-      if (responseData['success'] == true) {
-        setState(() {
-          isBookmarked = responseData['isBookmarked'];
-        });
+      if (response.statusCode == 200) {
+        final responseData = json.decode(responseBody);
+        if (responseData['success'] == true) {
+          setState(() {
+            isBookmarked = responseData['isBookmarked'];
+          });
+        } else {
+          print("Failed to check bookmark status: ${responseData['message']}");
+        }
       } else {
-        print("Failed to check bookmark status: ${responseData['message']}");
+        print("HTTP error: ${response.statusCode}");
       }
-    } else {
-      print("HTTP error: ${response.statusCode}");
+    } catch (e) {
+      print("Error checking bookmark status: $e");
     }
-  } catch (e) {
-    print("Error checking bookmark status: $e");
   }
-}
-
 
   Future<void> toggleBookmark() async {
     try {
@@ -111,7 +110,9 @@ Future<void> checkBookmarkStatus() async {
 
         final message = responseData['message'] ?? "Success";
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.green,),
+          SnackBar(
+            content: Text(message),
+          ),
         );
       } else {
         print(
@@ -188,61 +189,61 @@ Future<void> checkBookmarkStatus() async {
     return icons;
   }
 
-Future<List<Widget>> _buildCategoryIcons(List<dynamic>? genres) async {
-  if (genres == null) return [];
+  Future<List<Widget>> _buildCategoryIcons(List<dynamic>? genres) async {
+    if (genres == null) return [];
 
-  List<Widget> categories = [];
-  for (var genre in genres) {
-    final genreSlug = genre['slug']; // Mengambil slug genre
-    final genrePath = 'assets/categories/$genreSlug.png';
+    List<Widget> categories = [];
+    for (var genre in genres) {
+      final genreSlug = genre['slug']; // Mengambil slug genre
+      final genrePath = 'assets/categories/$genreSlug.png';
 
-    // Memeriksa apakah aset ada
-    final assetExists = await doesAssetExist(genrePath);
+      // Memeriksa apakah aset ada
+      final assetExists = await doesAssetExist(genrePath);
 
-    categories.add(
-      Column(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.red,
-              borderRadius: BorderRadius.circular(12),
+      categories.add(
+        Column(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: EdgeInsets.all(14),
+              child: assetExists
+                  ? Image.asset(
+                      genrePath,
+                      width: 20,
+                      height: 20,
+                      fit: BoxFit.contain,
+                    )
+                  : Icon(
+                      Icons.sports_esports,
+                      color: Colors.white,
+                      size: 30,
+                    ),
             ),
-            padding: EdgeInsets.all(14),
-            child: assetExists
-                ? Image.asset(
-                    genrePath,
-                    width: 20,
-                    height: 20,
-                    fit: BoxFit.contain,
-                  )
-                : Icon(
-                    Icons.sports_esports,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-          ),
-          SizedBox(height: 4),
-          SizedBox(
-            width: 62,
-            height: 40, // Sesuaikan dengan lebar kontainer di atas
-            child: Text(
-              genre['name'] ?? '',
-              style: TextStyle(fontSize: 14),
-              maxLines: 2, // Maksimal dua baris teks
-              overflow: TextOverflow.ellipsis, // Tambahkan "..." jika teks terpotong
-              textAlign: TextAlign.center, // Pusatkan teks
-              softWrap: true, // Bungkus otomatis jika teks terlalu panjang
+            SizedBox(height: 4),
+            SizedBox(
+              width: 62,
+              height: 40, // Sesuaikan dengan lebar kontainer di atas
+              child: Text(
+                genre['name'] ?? '',
+                style: TextStyle(fontSize: 14),
+                maxLines: 2, // Maksimal dua baris teks
+                overflow: TextOverflow
+                    .ellipsis, // Tambahkan "..." jika teks terpotong
+                textAlign: TextAlign.center, // Pusatkan teks
+                softWrap: true, // Bungkus otomatis jika teks terlalu panjang
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    }
+    return categories;
   }
-  return categories;
-}
-
 
   Future<void> _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
@@ -379,7 +380,9 @@ Future<List<Widget>> _buildCategoryIcons(List<dynamic>? genres) async {
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
-                                return CircularProgressIndicator(color: Colors.red,);
+                                return CircularProgressIndicator(
+                                  color: Colors.red,
+                                );
                               } else if (snapshot.hasData) {
                                 return Row(children: snapshot.data!);
                               } else {
@@ -437,7 +440,9 @@ Future<List<Widget>> _buildCategoryIcons(List<dynamic>? genres) async {
                     future: _buildCategoryIcons(gameDetails?['genres']),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator(color: Colors.red,);
+                        return CircularProgressIndicator(
+                          color: Colors.red,
+                        );
                       } else if (snapshot.hasData) {
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -502,13 +507,21 @@ Future<List<Widget>> _buildCategoryIcons(List<dynamic>? genres) async {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    gameDetails?['website'] ?? 'N/A',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
+                  SizedBox(
+                    height: 8,
+                  ),
+                  InkWell(
+                    onTap: () async {
+                      final url = gameDetails?['website'];
+                      _launchURL(url);
+                    },
+                    child: Text(
+                      gameDetails?['website'] ?? 'N/A',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                   SizedBox(height: 16),
