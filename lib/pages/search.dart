@@ -7,8 +7,9 @@ import 'package:age_play/pages/filter.dart';
 
 class SearchPage extends StatefulWidget {
   final String? esrb;
+  final String? genres;
 
-  SearchPage({this.esrb});
+  SearchPage({this.esrb, this.genres});
 
   @override
   _SearchPageState createState() => _SearchPageState();
@@ -32,7 +33,7 @@ class _SearchPageState extends State<SearchPage> {
       });
     });
     if (widget.esrb != null) {
-      _applyFilterEsrb(widget.esrb!);
+      _applyFilterEsrb(widget.esrb!, widget.genres!);
       _isFilterApplied = true;
     }
   }
@@ -107,7 +108,7 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-  void _applyFilterEsrb(String esrb) async {
+  void _applyFilterEsrb(String esrb, String genres) async {
     setState(() {
       _isLoading = true;
       _isFilterApplied = true; // Tandai bahwa filter diterapkan
@@ -117,7 +118,7 @@ class _SearchPageState extends State<SearchPage> {
     try {
       // Gunakan ESRB yang diterima dari halaman DisplayPictureScreen
       final url =
-          Uri.parse('https://polinemaesports.my.id/api/game-esrb/$esrb');
+          Uri.parse('https://polinemaesports.my.id/api/game-esrb/$esrb?genres=$genres');
       print(esrb);
       final response = await http.get(url);
       if (response.statusCode == 200) {
