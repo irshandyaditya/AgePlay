@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:age_play/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:age_play/pages/search.dart';
@@ -49,7 +50,17 @@ class DisplayPictureScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
+        leading:  IconButton(
+          icon: Icon(Icons.home, color: const Color.fromARGB(255, 111, 111, 111),), // Ganti ikon di sini
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()), // Sesuaikan dengan halaman utama Anda
+              (Route<dynamic> route) => false,
+            );
+          },
+        ),
       ),
       backgroundColor: Colors.white,
       body: Padding(
@@ -76,6 +87,7 @@ class DisplayPictureScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: Image.file(
                   File(imagePath),
+                  key: ValueKey(imagePath),
                   fit: BoxFit.cover,
                 ),
               ),
