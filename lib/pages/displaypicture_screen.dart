@@ -15,36 +15,80 @@ class DisplayPictureScreen extends StatelessWidget {
       required this.age,
       required this.gender});
 
-  String determineEsrbRating(String? age) {
-    if (age == null) return 'everyone';
-    if (age == "0-3 years" || age == "4-7 years") return 'everyone';
-    if (age == "8-12 years") return 'everyone-10-plus';
-    if (age == "13-17 years") return 'teen';
-    if (age == "18-25 years") return 'mature';
-    if (age == "26-35 years") return 'adults-only';
-    return 'adults-only';
+Map<String, dynamic> determineEsrbAndGenre(String? age, String? gender) {
+  if (age == null || gender == null) {
+    return {'esrb': 'everyone', 'genre': ['casual']};
   }
 
-  Future<List<dynamic>> fetchGameRecommendations(String esrb) async {
-    final url = Uri.parse('https://polinemaesports.my.id/api/game-esrb/$esrb');
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['results'] as List<dynamic>;
-      } else {
-        throw Exception('Failed to fetch games');
-      }
-    } catch (e) {
-      return [];
-    }
+  if (age == "0-10" && gender.toLowerCase() == "male") {
+    return {'esrb': 'everyone', 'genre': 'platformer,puzzle,adventure'};
   }
+  if (age == "0-10" && gender.toLowerCase() == "female") {
+    return {'esrb': 'everyone', 'genre': 'simulation,adventure,puzzle'};
+  }
+
+  if (age == "11-15" && gender.toLowerCase() == "male") {
+    return {'esrb': 'everyone-10-plus', 'genre': 'action,shooter,sports'};
+  }
+  if (age == "11-15" && gender.toLowerCase() == "female") {
+    return {'esrb': 'everyone-10-plus', 'genre': 'simulation,adventure,educational'};
+  }
+
+  if (age == "16-20" && gender.toLowerCase() == "male") {
+    return {'esrb': 'teen', 'genre': 'role-playing-games-rpg,shooter,fighting'};
+  }
+  if (age == "16-20" && gender.toLowerCase() == "female") {
+    return {'esrb': 'teen', 'genre': 'role-playing-games-rpg,simulation,educational'};
+  }
+
+  if (age == "21-30" && gender.toLowerCase() == "male") {
+    return {'esrb': 'mature', 'genre': 'shooter,strategy,massively-multiplayer'};
+  }
+  if (age == "21-30" && gender.toLowerCase() == "female") {
+    return {'esrb': 'mature', 'genre': 'role-playing-games-rpg,adventure'};
+  }
+
+  if (age == "31-50" && gender.toLowerCase() == "male") {
+    return {'esrb': 'mature', 'genre': 'strategy,simulation,shooter'};
+  }
+  if (age == "31-50" && gender.toLowerCase() == "female") {
+    return {'esrb': 'mature', 'genre': 'simulation,puzzle,educational'};
+  }
+
+  if (age == "51-100" && gender.toLowerCase() == "male") {
+    return {'esrb': 'everyone', 'genre': 'card,strategy,casual'};
+  }
+  if (age == "51-100" && gender.toLowerCase() == "female") {
+    return {'esrb': 'everyone', 'genre': 'puzzle,board-games,casual'};
+  }
+
+  return {'esrb': 'adults-only', 'genre': 'casual'};
+}
+
+Future<List<dynamic>> fetchGameRecommendations(String? age, String? gender) async {
+  final esrbAndGenre = determineEsrbAndGenre(age, gender);
+  final esrb = esrbAndGenre['esrb'];
+  final genres = esrbAndGenre['genre'];
+  final url = Uri.parse('https://polinemaesports.my.id/api/game-esrb/$esrb?genres=$genres'); 
+  try {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['results'] as List<dynamic>;
+    } else {
+      throw Exception('Failed to fetch games');
+    }
+  } catch (e) {
+    return [];
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final esrbRating = determineEsrbRating(age);
+    final esrbRating = determineEsrbAndGenre(age, gender);
 
     return Scaffold(
       appBar: AppBar(
@@ -111,7 +155,7 @@ class DisplayPictureScreen extends StatelessWidget {
             ),
             SizedBox(height: screenHeight * 0.04),
             FutureBuilder<List<dynamic>>(
-              future: fetchGameRecommendations(esrbRating),
+              future: fetchGameRecommendations(age, gender),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator(color: Colors.red,);
@@ -189,7 +233,8 @@ class DisplayPictureScreen extends StatelessWidget {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => SearchPage(
-                                          esrb: esrbRating,
+                                          esrb: esrbRating['esrb'],
+                                          genres: esrbRating['genre'],
                                         )),
                               );
                             },
