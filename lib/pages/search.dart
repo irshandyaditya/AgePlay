@@ -180,6 +180,16 @@ class _SearchPageState extends State<SearchPage> {
                             decoration: InputDecoration(
                               hintText: "Search",
                               border: InputBorder.none,
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Colors.transparent
+                                )
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Colors.transparent
+                                )
+                              )
                             ),
                             onSubmitted: (_) => _performSearch(),
                           ),

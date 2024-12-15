@@ -1,3 +1,4 @@
+import 'package:age_play/core/theme/app_theme.dart';
 import 'package:age_play/pages/filter.dart';
 import 'package:age_play/pages/login.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: AppTheme.ourTheme,
       home: const Splashscreen(),
       routes: {
         '/signup': (context) => const SignUpPage(),
