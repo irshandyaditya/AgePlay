@@ -37,7 +37,7 @@ class _CameraPageState extends State<Camera> {
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
       body: cameras.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.red,))
           : TakePictureScreen(cameras), // Panggil `TakePictureScreen` dengan kamera yang dipilih
       // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );

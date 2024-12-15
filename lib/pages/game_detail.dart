@@ -379,7 +379,7 @@ Future<List<Widget>> _buildCategoryIcons(List<dynamic>? genres) async {
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
-                                return CircularProgressIndicator();
+                                return CircularProgressIndicator(color: Colors.red,);
                               } else if (snapshot.hasData) {
                                 return Row(children: snapshot.data!);
                               } else {
@@ -437,7 +437,7 @@ Future<List<Widget>> _buildCategoryIcons(List<dynamic>? genres) async {
                     future: _buildCategoryIcons(gameDetails?['genres']),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator();
+                        return CircularProgressIndicator(color: Colors.red,);
                       } else if (snapshot.hasData) {
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,

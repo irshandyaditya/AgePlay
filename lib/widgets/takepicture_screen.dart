@@ -199,7 +199,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
           builder: (BuildContext context, BoxConstraints constraints) {
             return Stack(
               children: [
-                Center(child: CircularProgressIndicator()), // Tampilkan loading jika belum siap
+                Center(child: CircularProgressIndicator(color: Colors.red,)), // Tampilkan loading jika belum siap
                 if (controller.value.isInitialized)
                   Positioned.fill(
                     top: 0,
@@ -218,7 +218,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                     ),
                   )
                 else
-                  Center(child: CircularProgressIndicator()),
+                  Center(child: CircularProgressIndicator(color: Colors.red,)),
 
                 Positioned(
                   top: 0,

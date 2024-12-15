@@ -114,7 +114,7 @@ class DisplayPictureScreen extends StatelessWidget {
               future: fetchGameRecommendations(esrbRating),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
+                  return CircularProgressIndicator(color: Colors.red,);
                 } else if (snapshot.hasError ||
                     snapshot.data == null ||
                     snapshot.data!.isEmpty) {
