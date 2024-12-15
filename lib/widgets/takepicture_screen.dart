@@ -141,9 +141,24 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         finalImage = File(image.path);
       }
 
+      // Hapus file lama
+      clearOldImage();
+
+      // Perbarui file baru
+      setState(() {
+        _image = finalImage;
+      });
+
       _uploadPhoto(finalImage);
     } catch (e) {
       print("Error capturing photo: \$e");
+    }
+  }
+
+  void clearOldImage() {
+    if (_image != null && _image!.existsSync()) {
+      _image!.deleteSync();
+      print("File lama dihapus: ${_image!.path}");
     }
   }
 
@@ -171,7 +186,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       final age = jsonResponse?['age'] ?? 'Unknown';
       final gender = jsonResponse?['gender'] ?? 'Unknown';
 
-      await Navigator.of(context).push(
+      await Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => DisplayPictureScreen(
             imagePath: imageFile.path,
