@@ -35,7 +35,8 @@ class _ChangePasswordState extends State<ChangePassword> {
       if (_newPassword != _confirmNewPassword) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("New Password and Confirmation Password do not match"),
+            content:
+                Text("New Password and Confirmation Password do not match"),
           ),
         );
         return;
@@ -50,7 +51,8 @@ class _ChangePasswordState extends State<ChangePassword> {
         final authToken = await storage.read(key: "auth_token");
 
         if (authToken == null) {
-          throw Exception("Authentication token not found. Please log in again.");
+          throw Exception(
+              "Authentication token not found. Please log in again.");
         }
 
         // Kirim data ke API dengan multipart request
@@ -73,12 +75,13 @@ class _ChangePasswordState extends State<ChangePassword> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Password updated successfully")),
             );
-                       Navigator.push(
+            Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => Profile()),
             );
           } else {
-            throw Exception(jsonResponse['error'] ?? "Failed to update password");
+            throw Exception(
+                jsonResponse['error'] ?? "Failed to update password");
           }
         } else {
           throw Exception(
