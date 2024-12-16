@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
+import 'package:age_play/pages/profile.dart';
 import 'package:http/http.dart' as http;
 
 class ChangePassword extends StatefulWidget {
@@ -72,7 +73,10 @@ class _ChangePasswordState extends State<ChangePassword> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Password updated successfully")),
             );
-            Navigator.pushNamed(context, '/profile');
+                       Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Profile()),
+            );
           } else {
             throw Exception(jsonResponse['error'] ?? "Failed to update password");
           }
