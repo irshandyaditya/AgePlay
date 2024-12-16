@@ -107,169 +107,171 @@ Future<List<dynamic>> fetchGameRecommendations(String? age, String? gender) asyn
         ),
       ),
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: 0),
-            Text(
-              "Hasil Deteksi",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 15),
-            Container(
-              width: screenWidth * 0.4,
-              height: screenHeight * 0.26,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(
-                  File(imagePath),
-                  key: ValueKey(imagePath),
-                  fit: BoxFit.cover,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 0),
+              Text(
+                "Hasil Deteksi",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-            SizedBox(height: screenHeight * 0.05),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Usia",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      "Jenis Kelamin",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
+              SizedBox(height: 15),
+              Container(
+                width: screenWidth * 0.4,
+                height: screenHeight * 0.26,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                SizedBox(width: 150),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(age ?? '-'),
-                    SizedBox(height: 10),
-                    Text(gender ?? '-'),
-                  ],
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    File(imagePath),
+                    key: ValueKey(imagePath),
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ],
-            ),
-            SizedBox(height: screenHeight * 0.04),
-            FutureBuilder<List<dynamic>>(
-              future: fetchGameRecommendations(age, gender),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(color: Colors.red,);
-                } else if (snapshot.hasError ||
-                    snapshot.data == null ||
-                    snapshot.data!.isEmpty) {
-                  return Text("Tidak ada rekomendasi game.");
-                } else {
-                  return Container(
-                    width: screenWidth * 0.8,
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(1000, 223, 223, 223),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                          child: Text(
-                            "Rekomendasi Game",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 16),
-                        Column(
-                          children: snapshot.data!
-                              .map((game) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => GameDetailsPage(
-                                          slug: game['slug'],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: Column(
-                                    children: [
-                                      GameRecommendation(
-                                        imageName:
-                                            game['background_image'] ?? '',
-                                        title: game['name'] ?? '-',
-                                        platform: (game['parent_platforms']
-                                                as List<dynamic>)
-                                            .map((e) => e.toString())
-                                            .toList(),
-                                        genre: (game['genres'] as List<dynamic>)
-                                            .map((e) => e.toString())
-                                            .toList(),
-                                        rating:
-                                            'Rating: ${game['rating'] ?? '-'}',
-                                        publisher:
-                                            'ESRB: ${game['esrb_rating'] ?? '-'}',
-                                        tags: '',
-                                      ),
-                                      SizedBox(height: 10),
-                                    ],
-                                  ),
-                                );
-                              })
-                              .take(2)
-                              .toList(),
-                        ),
-                        SizedBox(height: 16),
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => SearchPage(
-                                          esrb: esrbRating['esrb'],
-                                          genres: esrbRating['genre'],
-                                        )),
-                              );
-                            },
+              ),
+              SizedBox(height: screenHeight * 0.05),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Usia",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        "Jenis Kelamin",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  SizedBox(width: 150),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(age ?? '-'),
+                      SizedBox(height: 10),
+                      Text(gender ?? '-'),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: screenHeight * 0.04),
+              FutureBuilder<List<dynamic>>(
+                future: fetchGameRecommendations(age, gender),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator(color: Colors.red,);
+                  } else if (snapshot.hasError ||
+                      snapshot.data == null ||
+                      snapshot.data!.isEmpty) {
+                    return Text("Tidak ada rekomendasi game.");
+                  } else {
+                    return Container(
+                      width: screenWidth * 0.8,
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(1000, 223, 223, 223),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
                             child: Text(
-                              "Lainnya",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                              "Rekomendasi Game",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
+                          SizedBox(height: 16),
+                          Column(
+                            children: snapshot.data!
+                                .map((game) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => GameDetailsPage(
+                                            slug: game['slug'],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Column(
+                                      children: [
+                                        GameRecommendation(
+                                          imageName:
+                                              game['background_image'] ?? '',
+                                          title: game['name'] ?? '-',
+                                          platform: (game['parent_platforms']
+                                                  as List<dynamic>)
+                                              .map((e) => e.toString())
+                                              .toList(),
+                                          genre: (game['genres'] as List<dynamic>)
+                                              .map((e) => e.toString())
+                                              .toList(),
+                                          rating:
+                                              'Rating: ${game['rating'] ?? '-'}',
+                                          publisher:
+                                              'ESRB: ${game['esrb_rating'] ?? '-'}',
+                                          tags: '',
+                                        ),
+                                        SizedBox(height: 10),
+                                      ],
+                                    ),
+                                  );
+                                })
+                                .take(2)
+                                .toList(),
+                          ),
+                          SizedBox(height: 16),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SearchPage(
+                                            esrb: esrbRating['esrb'],
+                                            genres: esrbRating['genre'],
+                                          )),
+                                );
+                              },
+                              child: Text(
+                                "Lainnya",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
